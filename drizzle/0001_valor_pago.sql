@@ -1,0 +1,1 @@
+ALTER TABLE "participants" ADD COLUMN "paid_cents" integer;

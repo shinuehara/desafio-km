@@ -1,0 +1,155 @@
+"use client";
+
+import { useActionState } from "react";
+import { SubmitButton } from "@/components/client";
+import type { FormState } from "./actions";
+
+type Action = (prev: FormState, form: FormData) => Promise<FormState>;
+
+function Feedback({ state }: { state: FormState }) {
+  if (state.error) return <div role="alert" className="alert alert-bad">{state.error}</div>;
+  if (state.ok) return <div role="status" className="alert alert-ok">{state.ok}</div>;
+  return null;
+}
+
+export function LoginForm({ action }: { action: Action }) {
+  const [state, formAction] = useActionState(action, {});
+  return (
+    <form action={formAction} className="stack-lg">
+      <div className="field">
+        <label htmlFor="pw">Senha do organizador</label>
+        <input id="pw" name="password" type="password" className="input" autoComplete="current-password" required />
+      </div>
+      <Feedback state={state} />
+      <SubmitButton pendingText="Entrando…">Entrar</SubmitButton>
+    </form>
+  );
+}
+
+export type ChallengeValues = {
+  name: string; slug?: string; description: string; startDate: string; endDate: string; goals: string; price: string;
+  kitDescription: string; pixKey: string; pixName: string; pixCity: string; organizerName: string;
+  organizerWhatsapp: string; registrationOpen: boolean;
+};
+
+export function ChallengeForm({ action, values, isNew }: { action: Action; values: ChallengeValues; isNew?: boolean }) {
+  const [state, formAction] = useActionState(action, {});
+  return (
+    <form action={formAction} className="stack-lg">
+      <section className="card stack">
+        <h2 style={{ fontSize: 18 }}>Desafio</h2>
+        <div className="field">
+          <label htmlFor="c-nome">Nome do desafio</label>
+          <input id="c-nome" name="name" className="input" defaultValue={values.name} required />
+        </div>
+        {isNew && (
+          <div className="field">
+            <label htmlFor="c-slug">Endereço (opcional)</label>
+            <input id="c-slug" name="slug" className="input" placeholder="ex.: 42km-natal" defaultValue={values.slug} />
+            <div className="hint">Aparece no link: /d/<b>endereço</b>. Se deixar em branco, usamos o nome.</div>
+          </div>
+        )}
+        <div className="field">
+          <label htmlFor="c-desc">Descrição curta (opcional)</label>
+          <textarea id="c-desc" name="description" className="input" defaultValue={values.description} placeholder="Corra ou caminhe 42 km entre… no seu ritmo, onde quiser." />
+        </div>
+        <div className="grid-2" style={{ gap: 12 }}>
+          <div className="field">
+            <label htmlFor="c-ini">Início</label>
+            <input id="c-ini" name="startDate" type="date" className="input" defaultValue={values.startDate} required />
+          </div>
+          <div className="field">
+            <label htmlFor="c-fim">Fim</label>
+            <input id="c-fim" name="endDate" type="date" className="input" defaultValue={values.endDate} required />
+          </div>
+        </div>
+        <div className="field">
+          <label htmlFor="c-metas">Metas em km</label>
+          <input id="c-metas" name="goals" className="input" defaultValue={values.goals} required />
+          <div className="hint">Separe por vírgula. A primeira dá direito ao kit; as outras são opcionais (ex.: 42, 100).</div>
+        </div>
+        <div className="field">
+          <label htmlFor="c-kit">O que vem no kit</label>
+          <input id="c-kit" name="kitDescription" className="input" defaultValue={values.kitDescription} required />
+        </div>
+        <label className="check" htmlFor="c-aberto">
+          <input id="c-aberto" type="checkbox" name="registrationOpen" defaultChecked={values.registrationOpen} />
+          <span>Inscrições abertas</span>
+        </label>
+      </section>
+
+      <section className="card stack">
+        <h2 style={{ fontSize: 18 }}>Pagamento (PIX)</h2>
+        <div className="field">
+          <label htmlFor="c-valor">Valor da inscrição, com frete (R$)</label>
+          <input id="c-valor" name="price" inputMode="decimal" className="input" defaultValue={values.price} placeholder="120,00" required />
+        </div>
+        <div className="field">
+          <label htmlFor="c-pix">Chave PIX</label>
+          <input id="c-pix" name="pixKey" className="input" defaultValue={values.pixKey} placeholder="CPF, e-mail, celular (+55…) ou chave aleatória" />
+          <div className="hint">Celular como chave: escreva com +55, ex.: +5511912345678.</div>
+        </div>
+        <div className="grid-2" style={{ gap: 12 }}>
+          <div className="field">
+            <label htmlFor="c-pixnome">Nome do recebedor</label>
+            <input id="c-pixnome" name="pixName" className="input" maxLength={25} defaultValue={values.pixName} />
+          </div>
+          <div className="field">
+            <label htmlFor="c-pixcidade">Cidade do recebedor</label>
+            <input id="c-pixcidade" name="pixCity" className="input" maxLength={15} defaultValue={values.pixCity} />
+          </div>
+        </div>
+      </section>
+
+      <section className="card stack">
+        <h2 style={{ fontSize: 18 }}>Organizador</h2>
+        <div className="grid-2" style={{ gap: 12 }}>
+          <div className="field">
+            <label htmlFor="c-org">Nome</label>
+            <input id="c-org" name="organizerName" className="input" defaultValue={values.organizerName} />
+          </div>
+          <div className="field">
+            <label htmlFor="c-orgzap">WhatsApp</label>
+            <input id="c-orgzap" name="organizerWhatsapp" type="tel" className="input" defaultValue={values.organizerWhatsapp} placeholder="(11) 91234-5678" />
+          </div>
+        </div>
+        <div className="hint">Quem perder o link pessoal manda mensagem para este WhatsApp.</div>
+      </section>
+
+      <Feedback state={state} />
+      <SubmitButton>{isNew ? "Criar desafio" : "Salvar alterações"}</SubmitButton>
+    </form>
+  );
+}
+
+export function UploadForm({ action, accept, label }: { action: Action; accept: string; label: string }) {
+  const [state, formAction] = useActionState(action, {});
+  return (
+    <form action={formAction} className="stack">
+      <input type="file" name="file" accept={accept} aria-label={label} className="input" style={{ paddingTop: 10 }} required />
+      <Feedback state={state} />
+      <SubmitButton className="btn btn-sm" pendingText="Enviando…">{label}</SubmitButton>
+    </form>
+  );
+}
+
+export function TeamForm({ action }: { action: Action }) {
+  const [state, formAction] = useActionState(action, {});
+  return (
+    <form action={formAction} className="stack">
+      <div className="row">
+        <input name="name" className="input" placeholder="Nome da nova turma" aria-label="Nome da nova turma" required />
+        <SubmitButton className="btn btn-sm" pendingText="…">Criar turma</SubmitButton>
+      </div>
+      <Feedback state={state} />
+    </form>
+  );
+}
+
+export function ConfirmSubmit({ children, message, className = "btn btn-sm btn-danger" }: { children: React.ReactNode; message: string; className?: string }) {
+  return (
+    <button type="submit" className={className} onClick={(e) => { if (!confirm(message)) e.preventDefault(); }}>
+      {children}
+    </button>
+  );
+}
