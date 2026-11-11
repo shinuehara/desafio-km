@@ -69,7 +69,7 @@ Testes automáticos:
 npm test
 ```
 
-## Publicar (grátis: Supabase + Vercel)
+## Publicar (grátis: Supabase + Netlify)
 
 ### 1. Supabase (banco e arquivos)
 
@@ -88,19 +88,27 @@ No seu computador, com o `DATABASE_URL` do Supabase no `.env`:
 npm run db:migrate
 ```
 
-### 3. Vercel (site)
+### 3. Netlify (site)
 
-1. Crie uma conta em vercel.com e importe este repositório do GitHub.
-2. Em **Settings › Environment Variables**, cadastre todas as variáveis do `.env.example`:
-   - `APP_URL`: o endereço final do site, ex.: `https://desafio-km.vercel.app`;
-   - `SESSION_SECRET`: um texto aleatório longo, que você pode gerar com `openssl rand -base64 32`.
+O repositório já tem um `netlify.toml`. A Netlify reconhece o Next.js e usa o adaptador oficial sozinha.
+
+1. Crie uma conta em netlify.com e escolha **Add new project › Import an existing project › GitHub**. Selecione este repositório; as configurações de build já vêm preenchidas.
+2. Em **Project configuration › Environment variables**, cadastre todas as variáveis do `.env.example`:
+   - `APP_URL`: o endereço final do site, ex.: `https://desafio-km.netlify.app`;
+   - `SESSION_SECRET` e `CRON_SECRET`: textos aleatórios longos, que você pode gerar com `openssl rand -base64 32`.
 3. Faça o deploy. Depois entre em `/admin`, crie o desafio e mande o link de inscrição no grupo.
+
+A cada envio para a branch `main` no GitHub, a Netlify publica a nova versão sozinha.
+
+Para usar um domínio próprio (ex.: `desafiokm.com.br`), configure em **Domain management** na Netlify e atualize o `APP_URL`.
+
+> **Outra opção:** o mesmo código roda na Vercel sem mudanças. Basta importar o repositório lá e cadastrar as mesmas variáveis. Veja o aviso sobre uso comercial em "Custos e limites".
 
 ### 4. Limpeza automática das fotos (GitHub Actions, grátis)
 
 As fotos das atividades são apagadas **30 dias depois do fim de cada desafio**. Os km continuam valendo; só a imagem some. Isso mantém o Supabase dentro do plano grátis, que tem cerca de 1 GB para arquivos.
 
-1. Na Vercel, cadastre a variável `CRON_SECRET` com um texto aleatório longo.
+1. Na hospedagem, cadastre a variável `CRON_SECRET` (passo 3).
 2. No GitHub, em **Settings › Secrets and variables › Actions › New repository secret**, crie:
    - `APP_URL`: o endereço do site;
    - `CRON_SECRET`: o mesmo texto do passo 1.
@@ -109,21 +117,19 @@ O GitHub roda `.github/workflows/limpeza-fotos.yml` todo dia de madrugada. Para 
 
 Depois que um desafio acaba, também dá para apagar as fotos na hora pelo painel, em **Configurar desafio › Fotos das atividades**.
 
-Para usar um domínio próprio (ex.: `desafiokm.com.br`), configure em **Vercel › Settings › Domains** e atualize o `APP_URL`.
-
 Sempre que o banco mudar (novos arquivos em `drizzle/`), rode `npm run db:migrate` de novo com o `DATABASE_URL` de produção.
 
 ## Custos e limites (planos grátis)
 
 | Peça | Plano | Limite que importa aqui |
 | --- | --- | --- |
-| Vercel | Hobby (grátis) | Uso pessoal e **não comercial** (veja abaixo) |
+| Netlify | Free | Créditos mensais de uso; um desafio entre família e amigos fica bem abaixo. Arquivos enviados até 5 MB (limite de ~6 MB por requisição das funções) |
 | Supabase | Free | ~500 MB de banco (sobra) e ~1 GB de arquivos; o projeto pausa depois de ~1 semana sem uso e é reativado com um clique |
 | GitHub Actions | Grátis | Sobra para a limpeza diária |
 
 **Fotos:** o celular reduz cada foto para no máximo 1280 px antes de enviar, o que dá cerca de 100 a 200 KB por foto. Assim, 1 GB comporta mais de 5.000 fotos ao mesmo tempo, e a limpeza libera o espaço a cada desafio.
 
-**Vercel e uso comercial:** o plano Hobby é só para projetos sem fins comerciais, e as regras da Vercel citam "pedir ou processar pagamento dos visitantes" como exemplo de uso comercial. Como a página de PIX pede pagamento, leia as regras atuais antes de publicar e, na dúvida, use outra hospedagem: o código é um Next.js comum e também roda na Netlify ou no plano Pro da Vercel.
+**Uso comercial:** o plano grátis da Vercel (Hobby) é só para projetos sem fins comerciais, e as regras dela citam "pedir ou processar pagamento dos visitantes" como exemplo. Por isso a hospedagem recomendada aqui é a Netlify. Confira as regras atuais de qualquer hospedagem antes de publicar, porque elas mudam.
 
 ## Estrutura
 

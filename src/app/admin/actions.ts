@@ -10,6 +10,7 @@ import { checkPassword, endAdminSession, requireAdmin, startAdminSession } from 
 import { normalizeWhatsapp, parseMoneyToCents, slugify } from "@/lib/format";
 import { newKey, putFile } from "@/lib/storage";
 import { purgeChallengePhotos } from "@/lib/cleanup";
+import { MAX_UPLOAD_BYTES } from "@/lib/constants";
 import { challengePhase } from "@/lib/dates";
 
 export type FormState = { error?: string; ok?: string };
@@ -146,7 +147,9 @@ export async function uploadChallengeFile(id: number, slug: string, kind: "regul
   await requireAdmin();
   const file = form.get("file");
   if (!(file instanceof File) || file.size === 0) return { error: "Escolha um arquivo." };
-  if (file.size > 10 * 1024 * 1024) return { error: "Arquivo grande demais (máx. 10 MB)." };
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return { error: kind === "regulation" ? "O PDF passa de 5 MB. Reduza o arquivo (ex.: “Salvar como PDF” com qualidade menor) e tente de novo." : "A foto passa de 5 MB. Use uma foto menor." };
+  }
   if (kind === "regulation" && file.type !== "application/pdf") return { error: "O regulamento precisa ser PDF." };
   if (kind === "kit" && !["image/jpeg", "image/png", "image/webp"].includes(file.type)) return { error: "Use uma foto JPG, PNG ou WEBP." };
   const key = newKey(`c${id}/${kind}`, file.type);

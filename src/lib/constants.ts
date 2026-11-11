@@ -13,5 +13,11 @@ export const PHOTO_JPEG_QUALITY = 0.7;
 /** Dias depois do fim do desafio em que as fotos são apagadas automaticamente. */
 export const PHOTO_RETENTION_DAYS = 30;
 
-/** Tamanho máximo de uma foto depois da compressão no celular. */
-export const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
+/**
+ * Tamanho máximo de um arquivo enviado (foto, PDF do regulamento, foto do kit).
+ * As funções da Netlify recebem no máximo ~6 MB por requisição; 5 MB deixa folga.
+ */
+export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+
+/** Tamanho máximo de uma foto depois da compressão no celular (normalmente fica em ~200 KB). */
+export const MAX_PHOTO_BYTES = MAX_UPLOAD_BYTES;

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { MAX_UPLOAD_BYTES } from "@/lib/constants";
 import { SubmitButton } from "@/components/client";
 import type { FormState } from "./actions";
 
@@ -124,9 +125,19 @@ export function ChallengeForm({ action, values, isNew }: { action: Action; value
 
 export function UploadForm({ action, accept, label }: { action: Action; accept: string; label: string }) {
   const [state, formAction] = useActionState(action, {});
+  const [tooBig, setTooBig] = useState(false);
   return (
     <form action={formAction} className="stack">
-      <input type="file" name="file" accept={accept} aria-label={label} className="input" style={{ paddingTop: 10 }} required />
+      <input
+        type="file" name="file" accept={accept} aria-label={label} className="input" style={{ paddingTop: 10 }} required
+        onChange={(e) => {
+          const big = (e.target.files?.[0]?.size ?? 0) > MAX_UPLOAD_BYTES;
+          setTooBig(big);
+          if (big) e.target.value = "";
+        }}
+      />
+      {tooBig && <div role="alert" className="alert alert-bad">Arquivo maior que 5 MB. Escolha um arquivo menor.</div>}
+      <div className="hint">Até 5 MB.</div>
       <Feedback state={state} />
       <SubmitButton className="btn btn-sm" pendingText="Enviando…">{label}</SubmitButton>
     </form>

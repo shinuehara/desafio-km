@@ -3,7 +3,7 @@
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { IconCamera, IconCheck } from "@/components/Icons";
 import type { RegisterState } from "./actions";
-import { PHOTO_JPEG_QUALITY, PHOTO_MAX_SIDE_PX } from "@/lib/constants";
+import { MAX_PHOTO_BYTES, PHOTO_JPEG_QUALITY, PHOTO_MAX_SIDE_PX } from "@/lib/constants";
 
 type Props = {
   action: (prev: RegisterState, form: FormData) => Promise<RegisterState>;
@@ -61,6 +61,9 @@ export function RegisterForm({ action, today, yesterday, minDate, maxDate }: Pro
     fd.set("km", km);
     fd.set("date", date);
     const blob = await compress(photo);
+    if (blob.size > MAX_PHOTO_BYTES) {
+      return setLocalError("Essa foto é grande demais para enviar. Tente um print da tela do app ou do relógio.");
+    }
     const name = blob === photo ? photo.name : "foto.jpg";
     fd.set("photo", new File([blob], name, { type: blob.type || photo.type }));
     startTransition(() => dispatch(fd));

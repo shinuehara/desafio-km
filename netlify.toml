@@ -1,0 +1,9 @@
+# Configuração para publicar na Netlify (plano gratuito).
+# A Netlify detecta o Next.js e usa o adaptador oficial (@netlify/plugin-nextjs) sozinha.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NEXT_TELEMETRY_DISABLED = "1"
