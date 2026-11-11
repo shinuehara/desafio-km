@@ -25,8 +25,9 @@ export default async function RankingPage({ params, searchParams }: Props) {
 
   const me = sp.p && isTokenShape(sp.p) ? await getByToken(sp.p) : null;
   const meId = me && me.challenge.id === c.id ? me.participant.id : null;
-  const teams = await listTeams(c.id);
   const all = await standings(c.id);
+  // Turmas sem ninguém inscrito não aparecem nas abas do ranking.
+  const teams = (await listTeams(c.id)).filter((t) => all.some((r) => r.teamId === t.id));
   const kitGoal = c.goals[0] ?? 42;
 
   const defaultTab = me?.team?.slug ?? "geral";

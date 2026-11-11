@@ -9,3 +9,4 @@ next-env.d.ts
 
 # Pasta local da Netlify
 .netlify
+.preview

@@ -157,8 +157,10 @@ textarea.input { padding: 12px 14px; min-height: 100px; }
 .rank-row.me { background: var(--accent-soft); border: 2px solid var(--accent); }
 .rank-pos { flex: none; width: 34px; font: 700 18px var(--display); color: var(--muted); }
 
-.tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; padding: 4px; border-radius: 14px; background: var(--track); }
-.tabs a { min-height: 46px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 600; color: var(--ink-2); text-decoration: none; text-align: center; padding: 0 8px; }
+/* Abas: dividem a largura quando cabem; com muitas turmas, rolam para o lado. */
+.tabs { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(max-content, 1fr); gap: 6px; padding: 4px; border-radius: 14px; background: var(--track); overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs a { min-height: 46px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 600; color: var(--ink-2); text-decoration: none; text-align: center; padding: 0 14px; white-space: nowrap; }
 .tabs a[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(23, 24, 28, 0.15); }
 
 .bubble { align-self: flex-end; max-width: 92%; padding: 12px 14px; border-radius: 14px 14px 4px 14px; background: var(--bubble); color: var(--bubble-ink); white-space: pre-line; }
