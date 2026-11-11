@@ -1,3 +1,5 @@
+import { baseUrl } from "./config";
+
 /**
  * Links do WhatsApp (wa.me). Abrem o app com a mensagem pronta; a pessoa só toca em enviar.
  * Não usam a API do WhatsApp, então não têm custo nem risco de bloqueio do número.
@@ -14,8 +16,7 @@ export function waShare(text: string): string {
 }
 
 export function appUrl(path = ""): string {
-  const base = (process.env.APP_URL || "http://localhost:3000").replace(/\/+$/, "");
-  return base + path;
+  return baseUrl() + path;
 }
 
 export function personalLink(token: string): string {

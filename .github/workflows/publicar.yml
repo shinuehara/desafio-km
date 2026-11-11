@@ -1,0 +1,45 @@
+# Publica o site: copia a versão atual da branch "main" para a branch "producao".
+# A Netlify está configurada para publicar só a partir de "producao" (veja LANCAMENTO.md),
+# então nada vai ao ar sem alguém clicar em: Actions › Publicar no site › Run workflow.
+name: Publicar no site
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmacao:
+        description: 'Digite PUBLICAR para confirmar (cada publicação gasta créditos da Netlify)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conferir confirmação
+        if: ${{ github.event.inputs.confirmacao != 'PUBLICAR' }}
+        run: |
+          echo "Publicação cancelada: digite PUBLICAR no campo de confirmação."
+          exit 1
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Verificar antes de publicar
+        run: |
+          npm ci
+          npx tsc --noEmit
+          npm test
+
+      - name: Enviar para a branch producao
+        run: |
+          git push origin HEAD:refs/heads/producao
+          echo "Pronto! A Netlify vai publicar a versão $(git rev-parse --short HEAD) em alguns minutos."

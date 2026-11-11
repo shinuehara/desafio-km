@@ -71,21 +71,22 @@ npm test
 
 ## Publicar (grátis: Supabase + Netlify)
 
+> **Primeira vez?** Siga o [checklist de lançamento](LANCAMENTO.md): contas, variáveis, ensaio geral e migração do desafio em andamento.
+>
+> **Para publicar:** no GitHub, abra **Actions › Publicar no site › Run workflow** e digite `PUBLICAR`. A Netlify publica só a partir da branch `producao`, e as tabelas e pastas do Supabase são criadas e atualizadas sozinhas em cada publicação (`npm run setup`).
+
 ### 1. Supabase (banco e arquivos)
 
 1. Crie uma conta em supabase.com e um projeto. Escolha a região **São Paulo**.
-2. Em **Storage**, crie dois buckets:
-   - `publico`, marcado como **Public bucket** (guarda o regulamento e a foto do kit);
-   - `fotos`, **privado** (guarda as fotos das atividades, que só o organizador vê).
-3. Em **Project Settings › Database › Connection string**, copie a URI do **Transaction pooler** (porta 6543). Esse é o `DATABASE_URL`.
-4. Em **Project Settings › API**, copie a **Project URL** (`SUPABASE_URL`) e a chave **service_role** (`SUPABASE_SERVICE_ROLE_KEY`). Essa chave é secreta e nunca deve ir para o código.
+2. No botão **Connect**, copie a URI do **Transaction pooler** (porta 6543), que vira o `DATABASE_URL`, e a do **Session pooler** (porta 5432), que vira o `DATABASE_URL_DIRECT`.
+3. Em **Project Settings › API**, copie a **Project URL** (`SUPABASE_URL`) e a chave **service_role** (`SUPABASE_SERVICE_ROLE_KEY`). Essa chave é secreta e nunca deve ir para o código.
 
-### 2. Criar as tabelas
+### 2. Tabelas e pastas de arquivos
 
-No seu computador, com o `DATABASE_URL` do Supabase no `.env`:
+A publicação na Netlify roda `npm run setup` sozinha: cria e atualiza as tabelas e as pastas `publico` e `fotos`. Para rodar à mão, com as variáveis no `.env`:
 
 ```bash
-npm run db:migrate
+npm run setup
 ```
 
 ### 3. Netlify (site)
@@ -117,7 +118,7 @@ O GitHub roda `.github/workflows/limpeza-fotos.yml` todo dia de madrugada. Para 
 
 Depois que um desafio acaba, também dá para apagar as fotos na hora pelo painel, em **Configurar desafio › Fotos das atividades**.
 
-Sempre que o banco mudar (novos arquivos em `drizzle/`), rode `npm run db:migrate` de novo com o `DATABASE_URL` de produção.
+Quando o banco mudar (novos arquivos em `drizzle/`), a próxima publicação atualiza as tabelas sozinha.
 
 ## Custos e limites (planos grátis)
 

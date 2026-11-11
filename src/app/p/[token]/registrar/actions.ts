@@ -38,7 +38,12 @@ export async function registerActivity(token: string, _prev: RegisterState, form
   if (!type.startsWith("image/") || !extensionFor(type)) return { error: "Envie uma foto (JPG ou PNG)." };
 
   const key = newKey(`c${c.id}/p${p.id}`, type);
-  await putFile("fotos", key, Buffer.from(await photo.arrayBuffer()), type);
+  try {
+    await putFile("fotos", key, Buffer.from(await photo.arrayBuffer()), type);
+  } catch (e) {
+    console.error("Falha ao guardar foto", e);
+    return { error: "Não conseguimos guardar a foto agora. Tente de novo daqui a pouco." };
+  }
 
   const [row] = await db
     .insert(activities)

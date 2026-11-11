@@ -7,8 +7,8 @@ import { z } from "zod";
 import { db } from "@/db";
 import { activities, challenges, participants, teams } from "@/db/schema";
 import { checkPassword, endAdminSession, requireAdmin, startAdminSession } from "@/lib/auth";
-import { normalizeWhatsapp, parseMoneyToCents, slugify } from "@/lib/format";
-import { newKey, putFile } from "@/lib/storage";
+import { formatKm, normalizeWhatsapp, parseKmToMeters, parseMoneyToCents, slugify } from "@/lib/format";
+import { deleteFiles, newKey, putFile } from "@/lib/storage";
 import { purgeChallengePhotos } from "@/lib/cleanup";
 import { MAX_UPLOAD_BYTES } from "@/lib/constants";
 import { challengePhase } from "@/lib/dates";
@@ -64,6 +64,30 @@ export async function deleteParticipant(participantId: number, slug: string) {
   await requireAdmin();
   await db.delete(participants).where(eq(participants.id, participantId));
   revalidatePath(`/admin/d/${slug}`);
+}
+
+export async function addManualKm(challengeId: number, slug: string, _prev: FormState, form: FormData): Promise<FormState> {
+  await requireAdmin();
+  const [c] = await db.select().from(challenges).where(eq(challenges.id, challengeId)).limit(1);
+  if (!c) return { error: "Desafio não encontrado." };
+  const participantId = Number(form.get("participantId"));
+  const [p] = await db
+    .select()
+    .from(participants)
+    .where(and(eq(participants.id, participantId), eq(participants.challengeId, challengeId)))
+    .limit(1);
+  if (!p) return { error: "Escolha o participante." };
+  const meters = parseKmToMeters(String(form.get("km") ?? ""));
+  if (!meters) return { error: "Informe os km (ex.: 23,4)." };
+  if (meters > 1000 * 1000) return { error: "Valor alto demais. Confira os km." };
+  const date = String(form.get("date") ?? "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date < c.startDate || date > c.endDate) {
+    return { error: "A data precisa estar dentro do período do desafio." };
+  }
+  const note = String(form.get("note") ?? "").trim().slice(0, 120) || "Lançado pelo organizador";
+  await db.insert(activities).values({ participantId: p.id, distanceM: meters, activityDate: date, photoKey: null, adminNote: note });
+  revalidatePath(`/admin/d/${slug}`);
+  return { ok: `${formatKm(meters)} km lançados para ${p.name}.` };
 }
 
 // ---------- Desafio ----------
@@ -153,7 +177,12 @@ export async function uploadChallengeFile(id: number, slug: string, kind: "regul
   if (kind === "regulation" && file.type !== "application/pdf") return { error: "O regulamento precisa ser PDF." };
   if (kind === "kit" && !["image/jpeg", "image/png", "image/webp"].includes(file.type)) return { error: "Use uma foto JPG, PNG ou WEBP." };
   const key = newKey(`c${id}/${kind}`, file.type);
-  await putFile("publico", key, Buffer.from(await file.arrayBuffer()), file.type);
+  try {
+    await putFile("publico", key, Buffer.from(await file.arrayBuffer()), file.type);
+  } catch (e) {
+    console.error("Falha ao guardar arquivo", e);
+    return { error: e instanceof Error ? e.message : "Não foi possível guardar o arquivo." };
+  }
   await db
     .update(challenges)
     .set(kind === "regulation" ? { regulationKey: key, regulationName: file.name } : { kitImageKey: key })
@@ -172,6 +201,25 @@ export async function purgePhotosNow(challengeId: number, slug: string) {
   if (!c || challengePhase(c.startDate, c.endDate) !== "after") return;
   await purgeChallengePhotos(challengeId);
   revalidatePath(`/admin/d/${slug}`);
+}
+
+/** Exclui o desafio com tudo dentro (inscritos, atividades, fotos e arquivos). */
+export async function deleteChallenge(id: number, _prev: FormState, form: FormData): Promise<FormState> {
+  await requireAdmin();
+  const [c] = await db.select().from(challenges).where(eq(challenges.id, id)).limit(1);
+  if (!c) return { error: "Desafio não encontrado." };
+  if (String(form.get("confirmName") ?? "").trim() !== c.name) {
+    return { error: `Para excluir, digite exatamente o nome do desafio: ${c.name}` };
+  }
+  try {
+    await purgeChallengePhotos(c.id);
+    await deleteFiles("publico", [c.regulationKey, c.kitImageKey].filter((k): k is string => !!k));
+  } catch (e) {
+    console.error("Falha ao apagar arquivos do desafio", e);
+    return { error: "Não consegui apagar os arquivos. Tente de novo." };
+  }
+  await db.delete(challenges).where(eq(challenges.id, c.id));
+  redirect("/admin");
 }
 
 // ---------- Turmas ----------

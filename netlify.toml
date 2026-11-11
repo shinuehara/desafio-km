@@ -1,7 +1,8 @@
 # Configuração para publicar na Netlify (plano gratuito).
 # A Netlify detecta o Next.js e usa o adaptador oficial (@netlify/plugin-nextjs) sozinha.
 [build]
-  command = "npm run build"
+  # "setup" cria/atualiza as tabelas e as pastas de arquivos antes de cada publicação.
+  command = "npm run setup && npm run build"
   publish = ".next"
 
 [build.environment]

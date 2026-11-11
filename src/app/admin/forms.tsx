@@ -164,3 +164,55 @@ export function ConfirmSubmit({ children, message, className = "btn btn-sm btn-d
     </button>
   );
 }
+
+export function ManualKmForm({ action, people, minDate, maxDate }: { action: Action; people: { id: number; name: string }[]; minDate: string; maxDate: string }) {
+  const [state, formAction] = useActionState(action, {});
+  return (
+    <form action={formAction} className="card stack">
+      <h2 style={{ fontSize: 18 }}>Lançar km pelo organizador</h2>
+      <p className="small muted">
+        Para o saldo de quem já corria antes do sistema, ou para corrigir algo (ex.: a pessoa mandou a foto no grupo).
+        Entra no total na hora, sem foto, e aparece como “lançado pelo organizador”.
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12, alignItems: "end" }}>
+        <div className="field">
+          <label htmlFor="m-pessoa">Participante</label>
+          <select id="m-pessoa" name="participantId" className="input" required defaultValue="">
+            <option value="" disabled>Escolha…</option>
+            {people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        </div>
+        <div className="field">
+          <label htmlFor="m-km">Km</label>
+          <input id="m-km" name="km" inputMode="decimal" className="input" placeholder="23,4" required />
+        </div>
+        <div className="field">
+          <label htmlFor="m-dia">Dia</label>
+          <input id="m-dia" name="date" type="date" className="input" min={minDate} max={maxDate} defaultValue={maxDate} required />
+        </div>
+        <div className="field">
+          <label htmlFor="m-motivo">Motivo</label>
+          <input id="m-motivo" name="note" className="input" placeholder="Saldo antes do sistema" maxLength={120} />
+        </div>
+      </div>
+      <Feedback state={state} />
+      <SubmitButton className="btn btn-sm btn-dark" pendingText="Lançando…">Lançar km</SubmitButton>
+    </form>
+  );
+}
+
+export function DeleteChallengeForm({ action, name }: { action: Action; name: string }) {
+  const [state, formAction] = useActionState(action, {});
+  return (
+    <form action={formAction} className="stack">
+      <div className="field">
+        <label htmlFor="d-nome">Para confirmar, digite o nome do desafio: <b>{name}</b></label>
+        <input id="d-nome" name="confirmName" className="input" autoComplete="off" required />
+      </div>
+      <Feedback state={state} />
+      <ConfirmSubmit message={`Excluir “${name}” com todos os inscritos, atividades e fotos? Isso não pode ser desfeito.`}>
+        Excluir desafio
+      </ConfirmSubmit>
+    </form>
+  );
+}

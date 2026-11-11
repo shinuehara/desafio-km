@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth";
 import { listChallenges } from "@/lib/queries";
 import { deadlineLabel, shortDate } from "@/lib/dates";
 import { logout } from "./actions";
+import { ConfigBanner } from "./ConfigBanner";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Painel" };
@@ -19,6 +20,7 @@ export default async function AdminHome() {
         </div>
       </header>
       <main className="admin">
+        <ConfigBanner />
         <div className="row-between">
           <h1>Desafios</h1>
           <Link href="/admin/novo" className="btn btn-primary btn-sm" style={{ minHeight: 44 }}>+ Novo desafio</Link>

@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { countInvalid, getChallenge, listTeams, recentActivities, standings } from "@/lib/queries";
 import type { Standing } from "@/lib/queries";
 import type { Challenge, Team } from "@/db/schema";
-import { challengePhase, dateTimeBR, deadlineLabel, shortDate, weekdayDate } from "@/lib/dates";
+import { challengePhase, dateTimeBR, deadlineLabel, shortDate, todayISO, weekdayDate } from "@/lib/dates";
 import { photosExpireOn } from "@/lib/cleanup";
 import { PHOTO_RETENTION_DAYS } from "@/lib/constants";
 import { firstName, formatKm, formatMoney, formatWhatsapp, percent } from "@/lib/format";
@@ -14,10 +14,11 @@ import { ProgressBar } from "@/components/ui";
 import { CopyButton } from "@/components/client";
 import { IconDownload, IconLink } from "@/components/Icons";
 import {
-  addTeam, deleteParticipant, purgePhotosNow, removeTeam, setActivityInvalid, setKitSent, setPaid,
+  addManualKm, addTeam, deleteChallenge, deleteParticipant, purgePhotosNow, removeTeam, setActivityInvalid, setKitSent, setPaid,
   updateChallenge, uploadChallengeFile,
 } from "../../actions";
-import { ChallengeForm, ConfirmSubmit, TeamForm, UploadForm } from "../../forms";
+import { ChallengeForm, ConfirmSubmit, DeleteChallengeForm, ManualKmForm, TeamForm, UploadForm } from "../../forms";
+import { ConfigBanner } from "../../ConfigBanner";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Painel do desafio" };
@@ -72,6 +73,7 @@ export default async function AdminChallenge({ params, searchParams }: Props) {
       </header>
 
       <main className="admin">
+        <ConfigBanner />
         <div className="stats">
           <div className="stat"><span className="muted">Inscritos</span><b>{people.length}</b></div>
           <div className={`stat${pending ? " warn" : ""}`}><span>PIX a confirmar</span><b>{pending}</b></div>
@@ -111,6 +113,9 @@ async function ActivitiesTab({ c, filter }: { c: Challenge; filter: "todas" | "i
         <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
           <Link className="filter" href="?aba=atividades" aria-current={filter === "todas" ? "page" : undefined}>Todas</Link>
           <Link className="filter" href="?aba=atividades&filtro=invalidadas" aria-current={filter === "invalidadas" ? "page" : undefined}>Invalidadas ({nInvalid})</Link>
+          <a className="filter" href={`/admin/d/${c.slug}/exportar-atividades`}>
+            <IconDownload size={16} /> Exportar planilha
+          </a>
         </div>
       </div>
 
@@ -122,7 +127,12 @@ async function ActivitiesTab({ c, filter }: { c: Challenge; filter: "todas" | "i
           const url = a.photoKey ? urls[a.photoKey] : undefined;
           return (
             <article key={a.id} className={`feed-card${invalid ? " invalid" : ""}`}>
-              {url ? (
+              {a.adminNote ? (
+                <div className="feed-photo" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: 16, background: "var(--track)", color: "var(--ink-2)", textAlign: "center" }}>
+                  <span className="strong">Lançado pelo organizador</span>
+                  <span className="small">{a.adminNote}</span>
+                </div>
+              ) : url ? (
                 <a className="feed-photo" href={url} target="_blank" rel="noopener" aria-label={`Abrir foto de ${name} em tamanho grande`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} alt={`Foto enviada por ${name}`} loading="lazy" />
@@ -167,8 +177,15 @@ function PeopleTab({ c, teams, people, teamFilter }: { c: Challenge; teams: Team
   const team = teams.find((t) => t.slug === teamFilter);
   const rows = (team ? people.filter((p) => p.teamId === team.id) : people).slice().sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 
+  const today = todayISO();
   return (
     <section className="stack-lg">
+      <ManualKmForm
+        action={addManualKm.bind(null, c.id, c.slug)}
+        people={people.slice().sort((a, b) => a.name.localeCompare(b.name, "pt-BR")).map((p) => ({ id: p.id, name: p.name }))}
+        minDate={c.startDate}
+        maxDate={today < c.endDate ? (today < c.startDate ? c.startDate : today) : c.endDate}
+      />
       <div className="row-between">
         <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
           <Link className="filter" href="?aba=inscritos" aria-current={!team ? "page" : undefined}>Todas as turmas</Link>
@@ -391,6 +408,12 @@ function ConfigTab({ c, teams, people }: { c: Challenge; teams: Team[]; people: 
           <h2 style={{ fontSize: 18 }}><IconLink size={18} /> Links</h2>
           <div className="small">Inscrição: <b style={{ wordBreak: "break-all" }}>{appUrl(`/d/${c.slug}`)}</b></div>
           <div className="small">Ranking: <b style={{ wordBreak: "break-all" }}>{appUrl(`/d/${c.slug}/ranking`)}</b></div>
+        </section>
+
+        <section className="card stack" style={{ borderColor: "var(--bad-line)" }}>
+          <h2 style={{ fontSize: 18, color: "var(--bad-ink)" }}>Excluir desafio</h2>
+          <p className="small muted">Apaga o desafio com todos os inscritos, atividades e fotos. Use para desafios de teste. Antes, exporte as planilhas se quiser guardar algo.</p>
+          <DeleteChallengeForm action={deleteChallenge.bind(null, c.id)} name={c.name} />
         </section>
       </div>
     </section>

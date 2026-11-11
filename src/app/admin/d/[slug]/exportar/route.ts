@@ -5,13 +5,7 @@ import { isAdmin } from "@/lib/auth";
 import { getChallenge, standings } from "@/lib/queries";
 import { formatKm, formatWhatsapp } from "@/lib/format";
 import { personalLink, registerLink } from "@/lib/whatsapp";
-
-function csvCell(v: unknown): string {
-  let s = v == null ? "" : String(v);
-  // Evita que o Excel interprete o texto como fórmula.
-  if (/^[=+\-@]/.test(s)) s = "'" + s;
-  return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
+import { csvResponse } from "@/lib/csv";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
   if (!(await isAdmin())) return new Response("Não autorizado", { status: 401 });
@@ -42,12 +36,5 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
       ];
     });
 
-  // ";" e BOM: abre certo no Excel em português.
-  const csv = "﻿" + [header, ...lines].map((r) => r.map(csvCell).join(";")).join("\r\n");
-  return new Response(csv, {
-    headers: {
-      "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="inscritos-${c.slug}.csv"`,
-    },
-  });
+  return csvResponse([header, ...lines], `inscritos-${c.slug}.csv`);
 }

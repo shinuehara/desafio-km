@@ -114,7 +114,9 @@ export default async function ParticipantHome({ params }: Props) {
             <div className="icon-box"><IconRun /></div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="strong">{weekdayDate(a.activityDate)}</div>
-              <div className="small muted">{a.invalidatedAt ? "Não contou: o organizador não validou" : "Foto enviada"}</div>
+              <div className="small muted">
+                {a.invalidatedAt ? "Não contou: o organizador não validou" : a.adminNote ? `Lançado pelo organizador: ${a.adminNote}` : "Foto enviada"}
+              </div>
             </div>
             <div style={{ font: "700 18px var(--display)", textDecoration: a.invalidatedAt ? "line-through" : undefined }}>
               {formatKm(a.distanceM)} km

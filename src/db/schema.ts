@@ -98,6 +98,8 @@ export const activities = pgTable(
     /** Fica vazio depois que as fotos do desafio são apagadas (os km continuam valendo). */
     photoKey: text("photo_key"),
     invalidatedAt: timestamp("invalidated_at", { withTimezone: true }),
+    /** Preenchido quando o organizador lança os km (sem foto). Ex.: "Saldo antes do sistema". */
+    adminNote: text("admin_note"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("activities_participant").on(t.participantId)],
