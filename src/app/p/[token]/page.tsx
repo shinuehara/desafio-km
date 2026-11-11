@@ -5,7 +5,9 @@ import { ProgressBar } from "@/components/ui";
 import { IconPlus, IconRun, IconTrophy } from "@/components/Icons";
 import { SubmitButton } from "@/components/client";
 import { participantActivities } from "@/lib/queries";
-import { deadlineLabel, weekdayDate, challengePhase } from "@/lib/dates";
+import { deadlineLabel, weekdayDate, challengePhase, todayISO } from "@/lib/dates";
+import { cumulativeByDay } from "@/lib/progress";
+import { ProgressChart } from "@/components/ProgressChart";
 import { firstName, formatKm, percent } from "@/lib/format";
 import { loadParticipant } from "./load";
 import { acceptNextGoal, declineNextGoal } from "./actions";
@@ -92,6 +94,17 @@ export default async function ParticipantHome({ params }: Props) {
       <Link href={`/d/${c.slug}/ranking?p=${token}`} className="btn">
         <IconTrophy /> Ver o ranking{team ? ` da turma ${team.name}` : ""}
       </Link>
+
+      <section className="card stack">
+        <h2 style={{ fontSize: 18 }}>Sua evolução</h2>
+        <ProgressChart
+          points={cumulativeByDay(list)}
+          startDate={c.startDate}
+          endDate={c.endDate}
+          today={todayISO()}
+          goalKm={p.goalKm}
+        />
+      </section>
 
       <section className="stack">
         <h2>Suas atividades</h2>
