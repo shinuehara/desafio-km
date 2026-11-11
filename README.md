@@ -27,7 +27,7 @@ O acesso é por uma senha única, definida em `ADMIN_PASSWORD`.
 - **Atividades:** cada registro mostra a foto e os km marcados. Tudo conta na hora, e o botão **Invalidar** tira a atividade do total. Se foi engano, o botão vira **Desfazer**.
 - **Inscritos:** confirmar o PIX, marcar o kit como enviado, **Enviar link** (abre o WhatsApp da pessoa com o link pessoal), excluir inscrições de teste e exportar uma planilha (CSV) com os endereços para o envio dos kits.
 - **Ranking:** uma mensagem pronta por turma para colar no grupo, além do link do ranking público.
-- **Configurar desafio:** datas, metas (ex.: `42, 100`), valor com frete, chave PIX, regulamento em PDF, foto do kit e turmas, cada uma com o próprio link de convite.
+- **Configurar desafio:** datas, metas (ex.: `42, 100`), valor com frete, chave PIX, regulamento em PDF, foto do kit (reduzida automaticamente), link para ver o kit em detalhes (ex.: Instagram) e turmas, cada uma com o próprio link de convite.
 
 > **Sobre o PIX:** o QR Code é gerado a partir da chave PIX do organizador (PIX estático, sem intermediário e sem taxa). O sistema **não** confirma o pagamento sozinho: o organizador confere no banco e clica em **Confirmar PIX**. Cada código leva um identificador `DKM<link>`, que alguns bancos mostram no extrato.
 

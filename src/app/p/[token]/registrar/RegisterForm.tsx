@@ -4,6 +4,7 @@ import { startTransition, useActionState, useEffect, useRef, useState } from "re
 import { IconCamera, IconCheck } from "@/components/Icons";
 import type { RegisterState } from "./actions";
 import { MAX_PHOTO_BYTES, PHOTO_JPEG_QUALITY, PHOTO_MAX_SIDE_PX } from "@/lib/constants";
+import { compressImage } from "@/lib/image-client";
 
 type Props = {
   action: (prev: RegisterState, form: FormData) => Promise<RegisterState>;
@@ -14,23 +15,6 @@ type Props = {
 };
 
 const QUICK = ["2", "3", "5", "10"];
-
-/** Reduz a foto no próprio celular (fica rápida de enviar mesmo com internet fraca). */
-async function compress(file: File): Promise<Blob> {
-  try {
-    const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, PHOTO_MAX_SIDE_PX / Math.max(bitmap.width, bitmap.height));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(bitmap.width * scale);
-    canvas.height = Math.round(bitmap.height * scale);
-    canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", PHOTO_JPEG_QUALITY));
-    // Se a "compressão" ficou maior que o original (ex.: print pequeno), manda o original.
-    return blob && blob.size < file.size ? blob : file;
-  } catch {
-    return file; // formato que o navegador não abre: manda como está
-  }
-}
 
 export function RegisterForm({ action, today, yesterday, minDate, maxDate }: Props) {
   const [state, dispatch, pending] = useActionState(action, {});
@@ -60,12 +44,12 @@ export function RegisterForm({ action, today, yesterday, minDate, maxDate }: Pro
     const fd = new FormData();
     fd.set("km", km);
     fd.set("date", date);
-    const blob = await compress(photo);
-    if (blob.size > MAX_PHOTO_BYTES) {
+    // Reduz a foto no próprio celular: fica rápida de enviar mesmo com internet fraca.
+    const small = await compressImage(photo, PHOTO_MAX_SIDE_PX, PHOTO_JPEG_QUALITY);
+    if (small.size > MAX_PHOTO_BYTES) {
       return setLocalError("Essa foto é grande demais para enviar. Tente um print da tela do app ou do relógio.");
     }
-    const name = blob === photo ? photo.name : "foto.jpg";
-    fd.set("photo", new File([blob], name, { type: blob.type || photo.type }));
+    fd.set("photo", small);
     startTransition(() => dispatch(fd));
   }
 

@@ -1,0 +1,1 @@
+ALTER TABLE "challenges" ADD COLUMN "kit_link_url" text;

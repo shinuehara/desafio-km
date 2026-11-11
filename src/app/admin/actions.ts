@@ -10,7 +10,7 @@ import { checkPassword, endAdminSession, requireAdmin, startAdminSession } from 
 import { formatKm, normalizeWhatsapp, parseKmToMeters, parseMoneyToCents, slugify } from "@/lib/format";
 import { deleteFiles, newKey, putFile } from "@/lib/storage";
 import { purgeChallengePhotos } from "@/lib/cleanup";
-import { MAX_UPLOAD_BYTES } from "@/lib/constants";
+import { KIT_IMAGE_MAX_BYTES, MAX_UPLOAD_BYTES } from "@/lib/constants";
 import { challengePhase } from "@/lib/dates";
 
 export type FormState = { error?: string; ok?: string };
@@ -100,6 +100,7 @@ const challengeSchema = z.object({
   goals: z.string(),
   price: z.string(),
   kitDescription: z.string().trim().min(2).max(80),
+  kitLinkUrl: z.string().trim().max(300).default(""),
   pixKey: z.string().trim().max(77).default(""),
   pixName: z.string().trim().max(25).default(""),
   pixCity: z.string().trim().max(15).default(""),
@@ -107,6 +108,17 @@ const challengeSchema = z.object({
   organizerWhatsapp: z.string().default(""),
   registrationOpen: z.string().optional(),
 });
+
+/** Aceita só endereços https completos (bloqueia "javascript:" e afins). */
+function safeHttpsUrl(raw: string): string | null {
+  const withScheme = /^[a-z]+:\/\//i.test(raw) ? raw : `https://${raw}`;
+  try {
+    const u = new URL(withScheme);
+    return u.protocol === "https:" && u.hostname.includes(".") ? u.toString() : null;
+  } catch {
+    return null;
+  }
+}
 
 function parseChallenge(form: FormData) {
   const parsed = challengeSchema.safeParse(Object.fromEntries(form));
@@ -121,6 +133,12 @@ function parseChallenge(form: FormData) {
   if (goals.length === 0) return { error: "Informe pelo menos uma meta em km (ex.: 42, 100)." };
   const priceCents = parseMoneyToCents(d.price || "0");
   if (priceCents === null) return { error: "Valor da inscrição inválido. Ex.: 120,00" };
+  let kitLinkUrl: string | null = null;
+  if (d.kitLinkUrl) {
+    const url = safeHttpsUrl(d.kitLinkUrl);
+    if (!url) return { error: "O link do kit precisa ser um endereço completo, começando com https:// (ex.: https://www.instagram.com/p/…)." };
+    kitLinkUrl = url;
+  }
   let organizerWhatsapp = "";
   if (d.organizerWhatsapp.trim()) {
     const n = normalizeWhatsapp(d.organizerWhatsapp);
@@ -136,6 +154,7 @@ function parseChallenge(form: FormData) {
       goals: [...new Set(goals)],
       priceCents,
       kitDescription: d.kitDescription,
+      kitLinkUrl,
       pixKey: d.pixKey,
       pixName: d.pixName,
       pixCity: d.pixCity,
@@ -176,6 +195,9 @@ export async function uploadChallengeFile(id: number, slug: string, kind: "regul
   }
   if (kind === "regulation" && file.type !== "application/pdf") return { error: "O regulamento precisa ser PDF." };
   if (kind === "kit" && !["image/jpeg", "image/png", "image/webp"].includes(file.type)) return { error: "Use uma foto JPG, PNG ou WEBP." };
+  if (kind === "kit" && file.size > KIT_IMAGE_MAX_BYTES) {
+    return { error: "A foto do kit passou de 1 MB. Ela aparece para todo mundo que abre a página, então precisa ser leve: tente outra foto." };
+  }
   const key = newKey(`c${id}/${kind}`, file.type);
   try {
     await putFile("publico", key, Buffer.from(await file.arrayBuffer()), file.type);

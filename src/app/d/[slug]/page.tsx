@@ -17,6 +17,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return c ? { title: c.name, description: c.description || undefined } : {};
 }
 
+function kitLinkLabel(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "").startsWith("instagram.com") ? "ver o kit no Instagram" : "ver o kit em detalhes";
+  } catch {
+    return "ver o kit em detalhes";
+  }
+}
+
 export default async function ChallengePage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { turma } = await searchParams;
@@ -43,7 +51,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
 
       {c.kitImageKey && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={publicUrl(c.kitImageKey)} alt={`Kit do desafio: ${c.kitDescription}`} style={{ borderRadius: 18, width: "100%" }} />
+        <img src={publicUrl(c.kitImageKey)} alt={`Kit do desafio: ${c.kitDescription}`} width={1200} height={900} style={{ borderRadius: 18, width: "100%", height: "auto" }} />
       )}
 
       <section className="card stack">
@@ -53,7 +61,17 @@ export default async function ChallengePage({ params, searchParams }: Props) {
         </div>
         <div className="row">
           <span style={{ color: "var(--accent)" }}><IconMedal size={24} /></span>
-          <div><b>{c.kitDescription}</b> para quem completar {firstGoal} km</div>
+          <div>
+            <b>{c.kitDescription}</b> para quem completar {firstGoal} km
+            {c.kitLinkUrl && (
+              <>
+                {" · "}
+                <a href={c.kitLinkUrl} target="_blank" rel="noopener noreferrer">
+                  {kitLinkLabel(c.kitLinkUrl)}
+                </a>
+              </>
+            )}
+          </div>
         </div>
         <div className="row">
           <span style={{ color: "var(--accent)" }}><IconTruck size={24} /></span>

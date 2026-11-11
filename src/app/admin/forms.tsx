@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useState } from "react";
+import { compressImage } from "@/lib/image-client";
 import { MAX_UPLOAD_BYTES } from "@/lib/constants";
 import { SubmitButton } from "@/components/client";
 import type { FormState } from "./actions";
@@ -29,7 +30,7 @@ export function LoginForm({ action }: { action: Action }) {
 
 export type ChallengeValues = {
   name: string; slug?: string; description: string; startDate: string; endDate: string; goals: string; price: string;
-  kitDescription: string; pixKey: string; pixName: string; pixCity: string; organizerName: string;
+  kitDescription: string; kitLinkUrl: string; pixKey: string; pixName: string; pixCity: string; organizerName: string;
   organizerWhatsapp: string; registrationOpen: boolean;
 };
 
@@ -72,6 +73,11 @@ export function ChallengeForm({ action, values, isNew }: { action: Action; value
         <div className="field">
           <label htmlFor="c-kit">O que vem no kit</label>
           <input id="c-kit" name="kitDescription" className="input" defaultValue={values.kitDescription} required />
+        </div>
+        <div className="field">
+          <label htmlFor="c-kitlink">Link para ver o kit em detalhes (opcional)</label>
+          <input id="c-kitlink" name="kitLinkUrl" type="url" inputMode="url" className="input" defaultValue={values.kitLinkUrl} placeholder="https://www.instagram.com/p/…" />
+          <div className="hint">Ex.: o post do Instagram com as fotos da camiseta e da medalha. Aparece na página do desafio.</div>
         </div>
         <label className="check" htmlFor="c-aberto">
           <input id="c-aberto" type="checkbox" name="registrationOpen" defaultChecked={values.registrationOpen} />
@@ -123,23 +129,44 @@ export function ChallengeForm({ action, values, isNew }: { action: Action; value
   );
 }
 
-export function UploadForm({ action, accept, label }: { action: Action; accept: string; label: string }) {
-  const [state, formAction] = useActionState(action, {});
-  const [tooBig, setTooBig] = useState(false);
+type ImageOptions = { maxSide: number; quality: number; maxBytes: number };
+
+export function UploadForm({ action, accept, label, image }: { action: Action; accept: string; label: string; image?: ImageOptions }) {
+  const [state, formAction, pending] = useActionState(action, {});
+  const [problem, setProblem] = useState<string | null>(null);
+
+  // Fotos são reduzidas no navegador antes do envio; PDFs vão como estão.
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    if (!image) return;
+    e.preventDefault();
+    const input = e.currentTarget.elements.namedItem("file") as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const small = await compressImage(file, image.maxSide, image.quality);
+    if (small.size > image.maxBytes) {
+      setProblem(`Mesmo reduzida, a foto ficou com ${(small.size / 1024 / 1024).toFixed(1)} MB. Use uma foto JPG ou PNG comum.`);
+      return;
+    }
+    setProblem(null);
+    const fd = new FormData();
+    fd.set("file", small);
+    startTransition(() => formAction(fd));
+  }
+
   return (
-    <form action={formAction} className="stack">
+    <form action={formAction} onSubmit={onSubmit} className="stack">
       <input
         type="file" name="file" accept={accept} aria-label={label} className="input" style={{ paddingTop: 10 }} required
         onChange={(e) => {
-          const big = (e.target.files?.[0]?.size ?? 0) > MAX_UPLOAD_BYTES;
-          setTooBig(big);
+          const big = !image && (e.target.files?.[0]?.size ?? 0) > MAX_UPLOAD_BYTES;
+          setProblem(big ? "Arquivo maior que 5 MB. Escolha um arquivo menor." : null);
           if (big) e.target.value = "";
         }}
       />
-      {tooBig && <div role="alert" className="alert alert-bad">Arquivo maior que 5 MB. Escolha um arquivo menor.</div>}
-      <div className="hint">Até 5 MB.</div>
+      {problem && <div role="alert" className="alert alert-bad">{problem}</div>}
+      <div className="hint">{image ? "A foto é reduzida automaticamente antes de enviar." : "Até 5 MB."}</div>
       <Feedback state={state} />
-      <SubmitButton className="btn btn-sm" pendingText="Enviando…">{label}</SubmitButton>
+      <button type="submit" className="btn btn-sm" disabled={pending}>{pending ? "Enviando…" : label}</button>
     </form>
   );
 }

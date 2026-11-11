@@ -21,6 +21,8 @@ export const challenges = pgTable("challenges", {
   goals: integer("goals").array().notNull().default([42, 100]),
   priceCents: integer("price_cents").notNull().default(0),
   kitDescription: text("kit_description").notNull().default("Camiseta + medalha"),
+  /** Link externo para ver o kit com mais detalhes (ex.: post no Instagram). */
+  kitLinkUrl: text("kit_link_url"),
   pixKey: text("pix_key").notNull().default(""),
   pixName: text("pix_name").notNull().default(""),
   pixCity: text("pix_city").notNull().default(""),

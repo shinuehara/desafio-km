@@ -6,7 +6,7 @@ import type { Standing } from "@/lib/queries";
 import type { Challenge, Team } from "@/db/schema";
 import { challengePhase, dateTimeBR, deadlineLabel, shortDate, todayISO, weekdayDate } from "@/lib/dates";
 import { photosExpireOn } from "@/lib/cleanup";
-import { PHOTO_RETENTION_DAYS } from "@/lib/constants";
+import { KIT_IMAGE_JPEG_QUALITY, KIT_IMAGE_MAX_BYTES, KIT_IMAGE_MAX_SIDE_PX, PHOTO_RETENTION_DAYS } from "@/lib/constants";
 import { firstName, formatKm, formatMoney, formatWhatsapp, percent } from "@/lib/format";
 import { privatePhotoUrls, publicUrl } from "@/lib/storage";
 import { appUrl, registerLinkMessage, waTo } from "@/lib/whatsapp";
@@ -330,6 +330,7 @@ function ConfigTab({ c, teams, people }: { c: Challenge; teams: Team[]; people: 
           goals: c.goals.join(", "),
           price: (c.priceCents / 100).toFixed(2).replace(".", ","),
           kitDescription: c.kitDescription,
+          kitLinkUrl: c.kitLinkUrl ?? "",
           pixKey: c.pixKey,
           pixName: c.pixName,
           pixCity: c.pixCity,
@@ -358,7 +359,12 @@ function ConfigTab({ c, teams, people }: { c: Challenge; teams: Team[]; people: 
           ) : (
             <p className="small muted">Aparece na página do desafio.</p>
           )}
-          <UploadForm action={uploadChallengeFile.bind(null, c.id, c.slug, "kit")} accept="image/jpeg,image/png,image/webp" label={c.kitImageKey ? "Trocar foto" : "Enviar foto"} />
+          <UploadForm
+            action={uploadChallengeFile.bind(null, c.id, c.slug, "kit")}
+            accept="image/jpeg,image/png,image/webp"
+            label={c.kitImageKey ? "Trocar foto" : "Enviar foto"}
+            image={{ maxSide: KIT_IMAGE_MAX_SIDE_PX, quality: KIT_IMAGE_JPEG_QUALITY, maxBytes: KIT_IMAGE_MAX_BYTES }}
+          />
         </section>
 
         <section className="card stack">

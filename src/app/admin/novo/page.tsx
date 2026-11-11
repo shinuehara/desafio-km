@@ -20,7 +20,7 @@ export default async function NewChallenge() {
           action={createChallenge}
           values={{
             name: "", description: "", startDate: start, endDate: addDaysISO(start, 60), goals: "42, 100", price: "",
-            kitDescription: "Camiseta + medalha", pixKey: "", pixName: "", pixCity: "", organizerName: "",
+            kitDescription: "Camiseta + medalha", kitLinkUrl: "", pixKey: "", pixName: "", pixCity: "", organizerName: "",
             organizerWhatsapp: "", registrationOpen: true,
           }}
         />

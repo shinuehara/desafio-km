@@ -10,6 +10,14 @@ export const MAX_KM_PER_ACTIVITY = 60;
 export const PHOTO_MAX_SIDE_PX = 1280;
 export const PHOTO_JPEG_QUALITY = 0.7;
 
+/**
+ * Foto do kit: aparece para todo mundo que abre a página do desafio, então precisa ser leve.
+ * O navegador do organizador reduz para 1200 px antes de enviar (~100–250 KB).
+ */
+export const KIT_IMAGE_MAX_SIDE_PX = 1200;
+export const KIT_IMAGE_JPEG_QUALITY = 0.8;
+export const KIT_IMAGE_MAX_BYTES = 1024 * 1024;
+
 /** Dias depois do fim do desafio em que as fotos são apagadas automaticamente. */
 export const PHOTO_RETENTION_DAYS = 30;
 
