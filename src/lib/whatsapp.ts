@@ -21,3 +21,23 @@ export function appUrl(path = ""): string {
 export function personalLink(token: string): string {
   return appUrl(`/p/${token}`);
 }
+
+/** Link curto que abre direto a tela de registrar atividade. É o link que vai no WhatsApp. */
+export function registerLink(token: string): string {
+  return appUrl(`/r/${token}`);
+}
+
+/**
+ * Mensagem com o link de registro, para o WhatsApp pessoal do participante.
+ * O WhatsApp não aceita link "escondido" atrás de um texto: o endereço aparece inteiro,
+ * por isso ele fica sozinho numa linha, logo depois da instrução.
+ */
+export function registerLinkMessage(opts: { firstName?: string; challengeName: string; token: string; confirmed?: boolean }): string {
+  const hello = opts.firstName ? `Oi, ${opts.firstName}! ` : "";
+  const status = opts.confirmed ? `Sua inscrição no ${opts.challengeName} está confirmada.\n\n` : "";
+  return (
+    `${hello}${status}Para registrar suas corridas e caminhadas${opts.confirmed ? "" : ` do ${opts.challengeName}`}, toque aqui:\n` +
+    `${registerLink(opts.token)}\n\n` +
+    `É só anotar os km e mandar a foto. Guarde esta mensagem!`
+  );
+}

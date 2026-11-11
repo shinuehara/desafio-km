@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.APP_URL || "http://localhost:3000"),
+  openGraph: { siteName: "Desafio KM", locale: "pt_BR", type: "website", images: [{ url: "/og.png", width: 1200, height: 630 }] },
   title: { default: "Desafio KM", template: "%s · Desafio KM" },
   description: "Desafios de corrida e caminhada com a família e os amigos.",
   appleWebApp: { capable: true, title: "Desafio KM", statusBarStyle: "default" },

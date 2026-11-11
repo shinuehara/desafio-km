@@ -9,7 +9,7 @@ import { photosExpireOn } from "@/lib/cleanup";
 import { PHOTO_RETENTION_DAYS } from "@/lib/constants";
 import { firstName, formatKm, formatMoney, formatWhatsapp, percent } from "@/lib/format";
 import { privatePhotoUrls, publicUrl } from "@/lib/storage";
-import { appUrl, personalLink, waTo } from "@/lib/whatsapp";
+import { appUrl, registerLinkMessage, waTo } from "@/lib/whatsapp";
 import { ProgressBar } from "@/components/ui";
 import { CopyButton } from "@/components/client";
 import { IconDownload, IconLink } from "@/components/Icons";
@@ -194,9 +194,7 @@ function PeopleTab({ c, teams, people, teamFilter }: { c: Challenge; teams: Team
             )}
             {rows.map((p) => {
               const done = p.meters >= kitGoal * 1000;
-              const msg = p.paidAt
-                ? `Oi, ${firstName(p.name)}! Sua inscrição no ${c.name} está confirmada.\n\nSeu link pessoal para registrar as atividades: ${personalLink(p.token)}`
-                : `Oi, ${firstName(p.name)}! Seu link pessoal do ${c.name}: ${personalLink(p.token)}`;
+              const msg = registerLinkMessage({ firstName: firstName(p.name), challengeName: c.name, token: p.token, confirmed: !!p.paidAt });
               return (
                 <tr key={p.id}>
                   <td>

@@ -4,7 +4,7 @@ import { participants, teams } from "@/db/schema";
 import { isAdmin } from "@/lib/auth";
 import { getChallenge, standings } from "@/lib/queries";
 import { formatKm, formatWhatsapp } from "@/lib/format";
-import { personalLink } from "@/lib/whatsapp";
+import { personalLink, registerLink } from "@/lib/whatsapp";
 
 function csvCell(v: unknown): string {
   let s = v == null ? "" : String(v);
@@ -28,7 +28,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
 
   const header = [
     "Nome", "WhatsApp", "Turma", "Camiseta", "Km", "Meta (km)", "Completou kit", "Pagamento", "Kit enviado",
-    "CEP", "Rua", "Número", "Complemento", "Bairro", "Cidade", "UF", "Link pessoal", "Inscrito em",
+    "CEP", "Rua", "Número", "Complemento", "Bairro", "Cidade", "UF", "Link de registro", "Página pessoal", "Inscrito em",
   ];
   const lines = addresses
     .sort((a, b) => a.p.name.localeCompare(b.p.name, "pt-BR"))
@@ -37,7 +37,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
       return [
         p.name, formatWhatsapp(p.whatsapp), teamName ?? "", p.shirtSize, formatKm(m), p.goalKm,
         m >= kitGoal * 1000 ? "sim" : "não", p.paidAt ? "pago" : "pendente", p.kitSentAt ? "sim" : "não",
-        p.cep, p.street, p.number, p.complement, p.neighborhood, p.city, p.state, personalLink(p.token),
+        p.cep, p.street, p.number, p.complement, p.neighborhood, p.city, p.state, registerLink(p.token), personalLink(p.token),
         p.createdAt.toISOString().slice(0, 10),
       ];
     });

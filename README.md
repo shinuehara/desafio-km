@@ -4,7 +4,7 @@ Sistema para desafios de corrida e caminhada entre família e amigos. Cada pesso
 
 Foi feito para quem tem pouca familiaridade com tecnologia:
 
-- **Sem app e sem senha.** Cada participante recebe um **link pessoal** pelo WhatsApp e entra por ele.
+- **Sem app e sem senha.** Cada participante recebe no WhatsApp um **link curto** (`/r/<link>`) que abre direto a tela de registrar atividade. Registrar custa só duas chamadas ao servidor: abrir a tela e enviar.
 - **Registrar uma atividade leva 3 passos:** quantos km, quando e a foto do app, do relógio ou da esteira.
 - **O grupo do WhatsApp continua sendo o lugar da festa.** Depois de registrar, um botão abre o WhatsApp com a mensagem pronta para o grupo.
 
@@ -16,7 +16,7 @@ Foi feito para quem tem pouca familiaridade com tecnologia:
 | Inscrição: nome, WhatsApp, turma, camiseta e endereço com preenchimento pelo CEP | `/d/<desafio>/inscricao` |
 | Pagamento: PIX com QR Code e "Copia e Cola" | `/p/<link>/pagamento` |
 | Página pessoal: progresso, convite para a próxima meta e histórico | `/p/<link>` |
-| Registrar atividade (a foto é obrigatória) | `/p/<link>/registrar` |
+| **Registrar atividade** (a foto é obrigatória). É o link curto que vai no WhatsApp de cada pessoa | `/r/<link>` |
 | Ranking público por turma e geral, com o primeiro nome e a inicial do sobrenome | `/d/<desafio>/ranking` |
 | "Já me inscrevi": abre o WhatsApp do organizador para pedir o link de novo | `/d/<desafio>/entrar` |
 

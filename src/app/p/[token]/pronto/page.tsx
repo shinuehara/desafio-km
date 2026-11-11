@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { IconChat, IconCheck } from "@/components/Icons";
 import { firstName } from "@/lib/format";
-import { personalLink, waTo } from "@/lib/whatsapp";
+import { registerLink, registerLinkMessage, waTo } from "@/lib/whatsapp";
 import { loadParticipant } from "../load";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +10,8 @@ export const metadata = { title: "Inscrição feita", robots: { index: false } }
 export default async function DonePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const { participant: p, challenge: c } = await loadParticipant(token);
-  const link = personalLink(token);
-  const msg = `Meu link do ${c.name}: ${link}\n\nÉ por ele que eu registro minhas corridas e caminhadas.`;
+  const link = registerLink(token);
+  const msg = registerLinkMessage({ challengeName: c.name, token });
 
   return (
     <main className="phone" style={{ paddingTop: 40 }}>
@@ -24,12 +24,12 @@ export default async function DonePage({ params }: { params: Promise<{ token: st
       </div>
 
       <section className="card-accent stack">
-        <div className="strong">Este é o seu link pessoal</div>
+        <div className="strong">Este é o seu link para registrar as atividades</div>
         <div style={{ padding: "12px 14px", borderRadius: 10, background: "var(--bg)", fontWeight: 600, wordBreak: "break-all" }}>
           {link.replace(/^https?:\/\//, "")}
         </div>
         <div className="small" style={{ color: "var(--ink-2)" }}>
-          É por ele que você anota suas corridas e caminhadas. <b>Não precisa de senha.</b>
+          Toque nele depois de cada corrida ou caminhada para anotar os km e mandar a foto. <b>Não precisa de senha.</b>
         </div>
       </section>
 
