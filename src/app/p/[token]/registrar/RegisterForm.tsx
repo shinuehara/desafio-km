@@ -3,6 +3,7 @@
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { IconCamera, IconCheck } from "@/components/Icons";
 import type { RegisterState } from "./actions";
+import { PHOTO_JPEG_QUALITY, PHOTO_MAX_SIDE_PX } from "@/lib/constants";
 
 type Props = {
   action: (prev: RegisterState, form: FormData) => Promise<RegisterState>;
@@ -18,13 +19,14 @@ const QUICK = ["2", "3", "5", "10"];
 async function compress(file: File): Promise<Blob> {
   try {
     const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+    const scale = Math.min(1, PHOTO_MAX_SIDE_PX / Math.max(bitmap.width, bitmap.height));
     const canvas = document.createElement("canvas");
     canvas.width = Math.round(bitmap.width * scale);
     canvas.height = Math.round(bitmap.height * scale);
     canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.82));
-    return blob ?? file;
+    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", PHOTO_JPEG_QUALITY));
+    // Se a "compressão" ficou maior que o original (ex.: print pequeno), manda o original.
+    return blob && blob.size < file.size ? blob : file;
   } catch {
     return file; // formato que o navegador não abre: manda como está
   }

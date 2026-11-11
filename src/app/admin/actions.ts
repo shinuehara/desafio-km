@@ -9,6 +9,8 @@ import { activities, challenges, participants, teams } from "@/db/schema";
 import { checkPassword, endAdminSession, requireAdmin, startAdminSession } from "@/lib/auth";
 import { normalizeWhatsapp, parseMoneyToCents, slugify } from "@/lib/format";
 import { newKey, putFile } from "@/lib/storage";
+import { purgeChallengePhotos } from "@/lib/cleanup";
+import { challengePhase } from "@/lib/dates";
 
 export type FormState = { error?: string; ok?: string };
 
@@ -156,6 +158,17 @@ export async function uploadChallengeFile(id: number, slug: string, kind: "regul
   revalidatePath(`/admin/d/${slug}`);
   revalidatePath(`/d/${slug}`);
   return { ok: "Arquivo enviado." };
+}
+
+// ---------- Fotos ----------
+
+export async function purgePhotosNow(challengeId: number, slug: string) {
+  await requireAdmin();
+  const [c] = await db.select().from(challenges).where(eq(challenges.id, challengeId)).limit(1);
+  // Só depois do fim do desafio, para ninguém apagar as fotos sem querer no meio dele.
+  if (!c || challengePhase(c.startDate, c.endDate) !== "after") return;
+  await purgeChallengePhotos(challengeId);
+  revalidatePath(`/admin/d/${slug}`);
 }
 
 // ---------- Turmas ----------

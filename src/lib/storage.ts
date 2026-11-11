@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 /**
@@ -61,6 +61,25 @@ export async function putFile(bucket: Bucket, key: string, data: Buffer, content
   const p = safeLocalPath(bucket, key);
   await mkdir(path.dirname(p), { recursive: true });
   await writeFile(p, data);
+}
+
+/** Apaga arquivos (ignora os que já não existem). */
+export async function deleteFiles(bucket: Bucket, keys: string[]) {
+  if (keys.length === 0) return;
+  const sb = supabase();
+  for (let i = 0; i < keys.length; i += 100) {
+    const batch = keys.slice(i, i + 100);
+    if (sb) {
+      const res = await fetch(`${sb.url}/storage/v1/object/${bucket}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${sb.key}`, apikey: sb.key, "Content-Type": "application/json" },
+        body: JSON.stringify({ prefixes: batch }),
+      });
+      if (!res.ok) throw new Error(`Falha ao apagar arquivos (${res.status}): ${await res.text()}`);
+    } else {
+      await Promise.all(batch.map((k) => rm(safeLocalPath(bucket, k), { force: true })));
+    }
+  }
 }
 
 /** Leitura local (rota /api/arquivos). No Supabase os arquivos são servidos por ele. */

@@ -31,6 +31,8 @@ export const challenges = pgTable("challenges", {
   regulationName: text("regulation_name"),
   kitImageKey: text("kit_image_key"),
   registrationOpen: boolean("registration_open").notNull().default(true),
+  /** Quando as fotos das atividades foram apagadas (para liberar espaço). */
+  photosDeletedAt: timestamp("photos_deleted_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -93,7 +95,8 @@ export const activities = pgTable(
     /** Distância em metros (evita arredondamento de decimais). */
     distanceM: integer("distance_m").notNull(),
     activityDate: date("activity_date").notNull(),
-    photoKey: text("photo_key").notNull(),
+    /** Fica vazio depois que as fotos do desafio são apagadas (os km continuam valendo). */
+    photoKey: text("photo_key"),
     invalidatedAt: timestamp("invalidated_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },

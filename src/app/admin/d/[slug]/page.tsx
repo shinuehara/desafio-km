@@ -4,7 +4,9 @@ import { requireAdmin } from "@/lib/auth";
 import { countInvalid, getChallenge, listTeams, recentActivities, standings } from "@/lib/queries";
 import type { Standing } from "@/lib/queries";
 import type { Challenge, Team } from "@/db/schema";
-import { dateTimeBR, deadlineLabel, shortDate, weekdayDate } from "@/lib/dates";
+import { challengePhase, dateTimeBR, deadlineLabel, shortDate, weekdayDate } from "@/lib/dates";
+import { photosExpireOn } from "@/lib/cleanup";
+import { PHOTO_RETENTION_DAYS } from "@/lib/constants";
 import { firstName, formatKm, formatMoney, formatWhatsapp, percent } from "@/lib/format";
 import { privatePhotoUrls, publicUrl } from "@/lib/storage";
 import { appUrl, personalLink, waTo } from "@/lib/whatsapp";
@@ -12,7 +14,7 @@ import { ProgressBar } from "@/components/ui";
 import { CopyButton } from "@/components/client";
 import { IconDownload, IconLink } from "@/components/Icons";
 import {
-  addTeam, deleteParticipant, removeTeam, setActivityInvalid, setKitSent, setPaid,
+  addTeam, deleteParticipant, purgePhotosNow, removeTeam, setActivityInvalid, setKitSent, setPaid,
   updateChallenge, uploadChallengeFile,
 } from "../../actions";
 import { ChallengeForm, ConfirmSubmit, TeamForm, UploadForm } from "../../forms";
@@ -97,7 +99,7 @@ export default async function AdminChallenge({ params, searchParams }: Props) {
 
 async function ActivitiesTab({ c, filter }: { c: Challenge; filter: "todas" | "invalidadas" }) {
   const [rows, nInvalid] = await Promise.all([recentActivities(c.id, filter === "invalidadas"), countInvalid(c.id)]);
-  const urls = await privatePhotoUrls(rows.map((r) => r.activity.photoKey));
+  const urls = await privatePhotoUrls(rows.map((r) => r.activity.photoKey).filter((k): k is string => !!k));
 
   return (
     <section className="stack-lg">
@@ -117,13 +119,19 @@ async function ActivitiesTab({ c, filter }: { c: Challenge; filter: "todas" | "i
       <div className="feed">
         {rows.map(({ activity: a, name, teamName }) => {
           const invalid = !!a.invalidatedAt;
-          const url = urls[a.photoKey];
+          const url = a.photoKey ? urls[a.photoKey] : undefined;
           return (
             <article key={a.id} className={`feed-card${invalid ? " invalid" : ""}`}>
-              <a className="feed-photo" href={url} target="_blank" rel="noopener" aria-label={`Abrir foto de ${name} em tamanho grande`}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                {url ? <img src={url} alt={`Foto enviada por ${name}`} loading="lazy" /> : null}
-              </a>
+              {url ? (
+                <a className="feed-photo" href={url} target="_blank" rel="noopener" aria-label={`Abrir foto de ${name} em tamanho grande`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt={`Foto enviada por ${name}`} loading="lazy" />
+                </a>
+              ) : (
+                <div className="feed-photo" style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "#c9c7c1", fontSize: 14 }}>
+                  Foto apagada
+                </div>
+              )}
               <div className="feed-body">
                 <div className="row-between" style={{ alignItems: "flex-start", flexWrap: "nowrap" }}>
                   <div style={{ minWidth: 0 }}>
@@ -358,6 +366,27 @@ function ConfigTab({ c, teams, people }: { c: Challenge; teams: Team[]; people: 
             );
           })}
           <TeamForm action={addTeam.bind(null, c.id, c.slug)} />
+        </section>
+
+        <section className="card stack">
+          <h2 style={{ fontSize: 18 }}>Fotos das atividades</h2>
+          {c.photosDeletedAt ? (
+            <p className="small">As fotos foram apagadas em {dateTimeBR(c.photosDeletedAt)}. Os km continuam valendo.</p>
+          ) : (
+            <>
+              <p className="small muted">
+                Para economizar espaço, as fotos são apagadas sozinhas {PHOTO_RETENTION_DAYS} dias depois do fim do desafio
+                (a partir de {shortDate(photosExpireOn(c.endDate))}). Os km registrados continuam valendo.
+              </p>
+              {challengePhase(c.startDate, c.endDate) === "after" && (
+                <form action={purgePhotosNow.bind(null, c.id, c.slug)}>
+                  <ConfirmSubmit message="Apagar agora todas as fotos deste desafio? Os km continuam valendo, mas as fotos não podem ser recuperadas.">
+                    Apagar as fotos agora
+                  </ConfirmSubmit>
+                </form>
+              )}
+            </>
+          )}
         </section>
 
         <section className="card stack">
