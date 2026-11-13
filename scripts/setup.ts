@@ -9,15 +9,16 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 import { supabaseAuthHeaders, supabaseSecretKey } from "../src/lib/supabase-headers";
+import { migrationDbUrl, sslFor } from "../src/db/url";
 
 async function migrateDb() {
   // Para migrações, o Supabase recomenda a conexão "Session pooler" (porta 5432).
-  const url = process.env.DATABASE_URL_DIRECT || process.env.DATABASE_URL;
+  const url = migrationDbUrl();
   if (!url) {
     console.warn("⚠ DATABASE_URL não configurada: pulando as tabelas.");
     return;
   }
-  const pg = postgres(url, { prepare: false, max: 1, onnotice: () => {} });
+  const pg = postgres(url, { prepare: false, max: 1, onnotice: () => {}, ssl: sslFor(url) });
   try {
     await migrate(drizzle(pg), { migrationsFolder: "./drizzle" });
     console.log("✓ Tabelas atualizadas.");
