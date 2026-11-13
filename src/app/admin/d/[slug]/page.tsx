@@ -11,6 +11,9 @@ import { firstName, formatKm, formatMoney, formatWhatsapp, percent } from "@/lib
 import { privatePhotoUrls, publicUrl } from "@/lib/storage";
 import { appUrl, registerLinkMessage, waTo } from "@/lib/whatsapp";
 import { ProgressBar } from "@/components/ui";
+import QRCode from "qrcode";
+import { pixPayload } from "@/lib/pix";
+import { normalizePixKey } from "@/lib/pix-key";
 import { CopyButton } from "@/components/client";
 import { IconDownload, IconLink } from "@/components/Icons";
 import {
@@ -317,6 +320,34 @@ function RankingTab({ c, teams, people }: { c: Challenge; teams: Team[]; people:
 
 // ---------------------------------------------------------------------------
 
+async function PixTest({ c }: { c: Challenge }) {
+  if (!c.pixKey) {
+    return <p className="small muted">Cadastre a chave PIX ao lado e salve. O QR Code de teste aparece aqui.</p>;
+  }
+  const k = normalizePixKey(c.pixKey);
+  if (!k.ok) return <div className="alert alert-bad">{k.error}</div>;
+  if (c.priceCents <= 0) return <p className="small muted">Informe o valor da inscrição para gerar o QR Code.</p>;
+  const code = pixPayload({ key: k.value, name: c.pixName || c.organizerName, city: c.pixCity, amountCents: c.priceCents, txid: "DKMTESTE" });
+  const qr = await QRCode.toDataURL(code, { margin: 1, width: 360, errorCorrectionLevel: "M" });
+  return (
+    <div className="stack">
+      <div className="small">Chave reconhecida: <b>{k.label}</b></div>
+      <div className="row" style={{ flexWrap: "wrap", alignItems: "flex-start", gap: 16 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={qr} alt="QR Code PIX de teste" width={180} height={180} style={{ border: "1px solid var(--line)", borderRadius: 10, flex: "none" }} />
+        <div className="stack" style={{ flex: "1 1 200px", minWidth: 0 }}>
+          <div><b>{formatMoney(c.priceCents)}</b> para <b>{c.pixName || c.organizerName || "(sem nome)"}</b>{c.pixCity ? `, ${c.pixCity}` : ""}</div>
+          <p className="small muted">
+            Abra o app do seu banco, escolha PIX › Ler QR Code (ou Copia e Cola) e confira se o <b>nome do recebedor</b> e o
+            <b> valor</b> estão certos. Depois é só cancelar, sem pagar.
+          </p>
+          <CopyButton text={code} label="Copiar código PIX" className="btn btn-sm" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ConfigTab({ c, teams, people }: { c: Challenge; teams: Team[]; people: Standing[] }) {
   return (
     <section className="panel-cols">
@@ -341,6 +372,11 @@ function ConfigTab({ c, teams, people }: { c: Challenge; teams: Team[]; people: 
       />
 
       <div className="stack-lg">
+        <section className="card stack">
+          <h2 style={{ fontSize: 18 }}>Teste do PIX</h2>
+          <PixTest c={c} />
+        </section>
+
         <section className="card stack">
           <h2 style={{ fontSize: 18 }}>Regulamento (PDF)</h2>
           {c.regulationKey ? (

@@ -8,6 +8,7 @@ import { db } from "@/db";
 import { activities, challenges, participants, teams } from "@/db/schema";
 import { checkPassword, endAdminSession, requireAdmin, startAdminSession } from "@/lib/auth";
 import { configIssues } from "@/lib/config";
+import { normalizePixKey } from "@/lib/pix-key";
 import { formatKm, normalizeWhatsapp, parseKmToMeters, parseMoneyToCents, slugify } from "@/lib/format";
 import { deleteFiles, newKey, putFile } from "@/lib/storage";
 import { purgeChallengePhotos } from "@/lib/cleanup";
@@ -142,6 +143,12 @@ function parseChallenge(form: FormData) {
   if (goals.length === 0) return { error: "Informe pelo menos uma meta em km (ex.: 42, 100)." };
   const priceCents = parseMoneyToCents(d.price || "0");
   if (priceCents === null) return { error: "Valor da inscrição inválido. Ex.: 120,00" };
+  let pixKey = "";
+  if (d.pixKey) {
+    const k = normalizePixKey(d.pixKey);
+    if (!k.ok) return { error: k.error };
+    pixKey = k.value;
+  }
   let kitLinkUrl: string | null = null;
   if (d.kitLinkUrl) {
     const url = safeHttpsUrl(d.kitLinkUrl);
@@ -164,7 +171,7 @@ function parseChallenge(form: FormData) {
       priceCents,
       kitDescription: d.kitDescription,
       kitLinkUrl,
-      pixKey: d.pixKey,
+      pixKey,
       pixName: d.pixName,
       pixCity: d.pixCity,
       organizerName: d.organizerName,

@@ -94,7 +94,7 @@ export function ChallengeForm({ action, values, isNew }: { action: Action; value
         <div className="field">
           <label htmlFor="c-pix">Chave PIX</label>
           <input id="c-pix" name="pixKey" className="input" defaultValue={values.pixKey} placeholder="CPF, e-mail, celular (+55…) ou chave aleatória" />
-          <div className="hint">Celular como chave: escreva com +55, ex.: +5511912345678.</div>
+          <div className="hint">Pode digitar do jeito que preferir (com pontos, traços ou parênteses): o sistema reconhece o tipo e salva no formato que os bancos exigem. Depois confira no “Teste do PIX”.</div>
         </div>
         <div className="grid-2" style={{ gap: 12 }}>
           <div className="field">

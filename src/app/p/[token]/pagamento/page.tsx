@@ -4,6 +4,7 @@ import { CopyButton } from "@/components/client";
 import { Steps } from "@/components/ui";
 import { formatMoney } from "@/lib/format";
 import { pixPayload } from "@/lib/pix";
+import { normalizePixKey } from "@/lib/pix-key";
 import { loadParticipant } from "../load";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +26,8 @@ export default async function PaymentPage({ params }: { params: Promise<{ token:
   let code: string | null = null;
   let qr: string | null = null;
   if (c.pixKey && c.priceCents > 0) {
-    code = pixPayload({ key: c.pixKey, name: c.pixName || c.organizerName, city: c.pixCity, amountCents: c.priceCents, txid: `DKM${p.token}` });
+    const k = normalizePixKey(c.pixKey);
+    code = pixPayload({ key: k.ok ? k.value : c.pixKey, name: c.pixName || c.organizerName, city: c.pixCity, amountCents: c.priceCents, txid: `DKM${p.token}` });
     qr = await QRCode.toDataURL(code, { margin: 1, width: 440, errorCorrectionLevel: "M" });
   }
 
