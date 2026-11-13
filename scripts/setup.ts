@@ -8,6 +8,7 @@ import "dotenv/config";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
+import { supabaseAuthHeaders } from "../src/lib/supabase-headers";
 
 async function migrateDb() {
   // Para migrações, o Supabase recomenda a conexão "Session pooler" (porta 5432).
@@ -32,7 +33,7 @@ async function ensureBuckets() {
     console.warn("⚠ SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY não configuradas: pulando as pastas de arquivos.");
     return;
   }
-  const headers = { Authorization: `Bearer ${key}`, apikey: key, "Content-Type": "application/json" };
+  const headers = { ...supabaseAuthHeaders(key), "Content-Type": "application/json" };
   const wanted = [
     { id: "publico", public: true }, // regulamento e foto do kit
     { id: "fotos", public: false }, // fotos das atividades: só o organizador vê
@@ -40,7 +41,7 @@ async function ensureBuckets() {
   for (const b of wanted) {
     const res = await fetch(`${base}/storage/v1/bucket/${b.id}`, { headers });
     if (res.status === 401 || res.status === 403) {
-      throw new Error("O Supabase recusou a chave. Confira SUPABASE_SERVICE_ROLE_KEY (é a chave secreta \"service_role\", não a \"anon\").");
+      throw new Error("O Supabase recusou a chave. Confira SUPABASE_SERVICE_ROLE_KEY: use a chave secreta (\"service_role\" ou \"sb_secret_...\"), nunca a \"anon\" ou a \"publishable\".");
     }
     if (res.ok) {
       const current = (await res.json()) as { public: boolean };

@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { isHosted } from "./config";
+import { supabaseAuthHeaders } from "./supabase-headers";
 
 /**
  * Arquivos enviados: fotos das atividades (privadas, só o organizador vê) e
@@ -52,8 +53,7 @@ export async function putFile(bucket: Bucket, key: string, data: Buffer, content
     const res = await fetch(`${sb.url}/storage/v1/object/${bucket}/${key}`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${sb.key}`,
-        apikey: sb.key,
+        ...supabaseAuthHeaders(sb.key),
         "Content-Type": contentType,
         "x-upsert": "true",
       },
@@ -76,7 +76,7 @@ export async function deleteFiles(bucket: Bucket, keys: string[]) {
     if (sb) {
       const res = await fetch(`${sb.url}/storage/v1/object/${bucket}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${sb.key}`, apikey: sb.key, "Content-Type": "application/json" },
+        headers: { ...supabaseAuthHeaders(sb.key), "Content-Type": "application/json" },
         body: JSON.stringify({ prefixes: batch }),
       });
       if (!res.ok) throw new Error(`Falha ao apagar arquivos (${res.status}): ${await res.text()}`);
@@ -113,8 +113,7 @@ export async function privatePhotoUrls(keys: string[]): Promise<Record<string, s
   const res = await fetch(`${sb.url}/storage/v1/object/sign/fotos`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${sb.key}`,
-      apikey: sb.key,
+      ...supabaseAuthHeaders(sb.key),
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ expiresIn: 60 * 60, paths: keys }),

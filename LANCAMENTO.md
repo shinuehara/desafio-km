@@ -21,9 +21,9 @@ Tempo estimado: **1 a 2 horas**, incluindo o ensaio. Custo: **R$ 0** (planos gr�
   - a URI do **Session pooler** (porta **5432**), que vira o `DATABASE_URL_DIRECT`.
 
   Nas duas, troque `[YOUR-PASSWORD]` pela senha do banco.
-- [ ] Em **Project Settings › API**, copie:
+- [ ] Em **Project Settings › API Keys**, copie:
   - a **Project URL**, que vira o `SUPABASE_URL`;
-  - a chave **service_role**, que vira o `SUPABASE_SERVICE_ROLE_KEY`. Ela é **secreta**: nunca mande por WhatsApp nem coloque no código.
+  - a chave secreta, que vira o `SUPABASE_SERVICE_ROLE_KEY`: a **service_role** (aba "Legacy API Keys", começa com `eyJ`) ou a **Secret key** (começa com `sb_secret_`). As duas funcionam. Ela é **secreta**: nunca mande por WhatsApp nem coloque no código. Nunca use a `anon` nem a `publishable`.
 
 Você **não** precisa criar tabelas nem pastas no Supabase: a primeira publicação cria tudo sozinha.
 
