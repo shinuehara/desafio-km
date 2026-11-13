@@ -7,6 +7,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { activities, challenges, participants, teams } from "@/db/schema";
 import { checkPassword, endAdminSession, requireAdmin, startAdminSession } from "@/lib/auth";
+import { configIssues } from "@/lib/config";
 import { formatKm, normalizeWhatsapp, parseKmToMeters, parseMoneyToCents, slugify } from "@/lib/format";
 import { deleteFiles, newKey, putFile } from "@/lib/storage";
 import { purgeChallengePhotos } from "@/lib/cleanup";
@@ -18,6 +19,8 @@ export type FormState = { error?: string; ok?: string };
 // ---------- Login ----------
 
 export async function login(_prev: FormState, form: FormData): Promise<FormState> {
+  const blocking = configIssues().filter((i) => i.level === "erro" && /SESSION_SECRET|ADMIN_PASSWORD/.test(i.text));
+  if (blocking.length) return { error: `O painel ainda não está configurado. ${blocking.map((i) => i.text).join(" ")}` };
   if (!checkPassword(String(form.get("password") ?? ""))) {
     await new Promise((r) => setTimeout(r, 800)); // freia tentativas
     return { error: "Senha incorreta." };

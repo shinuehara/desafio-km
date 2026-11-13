@@ -36,6 +36,9 @@ export function configIssues(): ConfigIssue[] {
         : { level: "aviso", text: "Sem Supabase: os arquivos estão sendo guardados na pasta .data/ (só serve para testes no computador)." },
     );
   }
+  if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.trim().length < 16) {
+    issues.push({ level: "erro", text: "SESSION_SECRET ausente ou curta demais: use um texto aleatório com 32 caracteres ou mais. Sem ela, o login do painel não funciona." });
+  }
   if (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD.length < 8) {
     issues.push({ level: "erro", text: "ADMIN_PASSWORD ausente ou curta demais (use pelo menos 8 caracteres)." });
   } else if (/^(troque|teste|admin|senha|123)/i.test(process.env.ADMIN_PASSWORD) && hosted) {
