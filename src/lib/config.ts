@@ -1,3 +1,5 @@
+import { supabaseSecretKey } from "./supabase-headers";
+
 /**
  * Leitura central da configuração (variáveis de ambiente) e diagnóstico para o painel.
  */
@@ -18,7 +20,7 @@ export function baseUrl(): string {
 }
 
 export function supabaseConfigured(): boolean {
-  return !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return !!(process.env.SUPABASE_URL && supabaseSecretKey());
 }
 
 export type ConfigIssue = { level: "erro" | "aviso"; text: string };
@@ -30,7 +32,7 @@ export function configIssues(): ConfigIssue[] {
   if (!supabaseConfigured()) {
     issues.push(
       hosted
-        ? { level: "erro", text: "SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY não estão configuradas: fotos, regulamento e foto do kit não podem ser salvos." }
+        ? { level: "erro", text: "SUPABASE_URL e SUPABASE_SECRET_KEY não estão configuradas: fotos, regulamento e foto do kit não podem ser salvos." }
         : { level: "aviso", text: "Sem Supabase: os arquivos estão sendo guardados na pasta .data/ (só serve para testes no computador)." },
     );
   }

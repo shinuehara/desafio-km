@@ -7,3 +7,8 @@
 export function supabaseAuthHeaders(key: string): Record<string, string> {
   return key.startsWith("sb_") ? { apikey: key } : { apikey: key, Authorization: `Bearer ${key}` };
 }
+
+/** Chave secreta do Supabase: aceita o nome novo (SUPABASE_SECRET_KEY) ou o antigo (SUPABASE_SERVICE_ROLE_KEY). */
+export function supabaseSecretKey(): string | undefined {
+  return process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || undefined;
+}

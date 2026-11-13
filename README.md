@@ -79,7 +79,7 @@ npm test
 
 1. Crie uma conta em supabase.com e um projeto. Escolha a região **São Paulo**.
 2. No botão **Connect**, copie a URI do **Transaction pooler** (porta 6543), que vira o `DATABASE_URL`, e a do **Session pooler** (porta 5432), que vira o `DATABASE_URL_DIRECT`.
-3. Em **Project Settings › API**, copie a **Project URL** (`SUPABASE_URL`) e a chave **service_role** (`SUPABASE_SERVICE_ROLE_KEY`). Essa chave é secreta e nunca deve ir para o código.
+3. Em **Project Settings › API**, copie a **Project URL** (`SUPABASE_URL`) e a chave **service_role** (`SUPABASE_SECRET_KEY`). Essa chave é secreta e nunca deve ir para o código.
 
 ### 2. Tabelas e pastas de arquivos
 

@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { isHosted } from "./config";
-import { supabaseAuthHeaders } from "./supabase-headers";
+import { supabaseAuthHeaders, supabaseSecretKey } from "./supabase-headers";
 
 /**
  * Arquivos enviados: fotos das atividades (privadas, só o organizador vê) e
@@ -16,10 +16,10 @@ const LOCAL_ROOT = path.join(process.cwd(), ".data");
 
 function supabase() {
   const url = process.env.SUPABASE_URL?.replace(/\/+$/, "");
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = supabaseSecretKey();
   if (url && key) return { url, key };
   // Na hospedagem, o disco das funções é temporário: gravar lá perderia os arquivos.
-  if (isHosted()) throw new Error("Armazenamento de arquivos não configurado (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY).");
+  if (isHosted()) throw new Error("Armazenamento de arquivos não configurado (SUPABASE_URL / SUPABASE_SECRET_KEY).");
   return null;
 }
 

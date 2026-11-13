@@ -8,7 +8,7 @@ import "dotenv/config";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
-import { supabaseAuthHeaders } from "../src/lib/supabase-headers";
+import { supabaseAuthHeaders, supabaseSecretKey } from "../src/lib/supabase-headers";
 
 async function migrateDb() {
   // Para migrações, o Supabase recomenda a conexão "Session pooler" (porta 5432).
@@ -28,9 +28,9 @@ async function migrateDb() {
 
 async function ensureBuckets() {
   const base = process.env.SUPABASE_URL?.replace(/\/+$/, "");
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = supabaseSecretKey();
   if (!base || !key) {
-    console.warn("⚠ SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY não configuradas: pulando as pastas de arquivos.");
+    console.warn("⚠ SUPABASE_URL/SUPABASE_SECRET_KEY não configuradas: pulando as pastas de arquivos.");
     return;
   }
   const headers = { ...supabaseAuthHeaders(key), "Content-Type": "application/json" };
@@ -41,7 +41,7 @@ async function ensureBuckets() {
   for (const b of wanted) {
     const res = await fetch(`${base}/storage/v1/bucket/${b.id}`, { headers });
     if (res.status === 401 || res.status === 403) {
-      throw new Error("O Supabase recusou a chave. Confira SUPABASE_SERVICE_ROLE_KEY: use a chave secreta (\"service_role\" ou \"sb_secret_...\"), nunca a \"anon\" ou a \"publishable\".");
+      throw new Error("O Supabase recusou a chave. Confira SUPABASE_SECRET_KEY: use a chave secreta (\"service_role\" ou \"sb_secret_...\"), nunca a \"anon\" ou a \"publishable\".");
     }
     if (res.ok) {
       const current = (await res.json()) as { public: boolean };

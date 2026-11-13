@@ -23,7 +23,7 @@ Tempo estimado: **1 a 2 horas**, incluindo o ensaio. Custo: **R$ 0** (planos gr�
   Nas duas, troque `[YOUR-PASSWORD]` pela senha do banco.
 - [ ] Em **Project Settings › API Keys**, copie:
   - a **Project URL**, que vira o `SUPABASE_URL`;
-  - a chave secreta, que vira o `SUPABASE_SERVICE_ROLE_KEY`: a **service_role** (aba "Legacy API Keys", começa com `eyJ`) ou a **Secret key** (começa com `sb_secret_`). As duas funcionam. Ela é **secreta**: nunca mande por WhatsApp nem coloque no código. Nunca use a `anon` nem a `publishable`.
+  - a chave secreta, que vira o `SUPABASE_SECRET_KEY`: a **service_role** (aba "Legacy API Keys", começa com `eyJ`) ou a **Secret key** (começa com `sb_secret_`). As duas funcionam. Ela é **secreta**: nunca mande por WhatsApp nem coloque no código. Nunca use a `anon` nem a `publishable`.
 
 Você **não** precisa criar tabelas nem pastas no Supabase: a primeira publicação cria tudo sozinha.
 
@@ -38,7 +38,7 @@ Você **não** precisa criar tabelas nem pastas no Supabase: a primeira publica�
   | `DATABASE_URL` | Transaction pooler do Supabase (porta 6543) |
   | `DATABASE_URL_DIRECT` | Session pooler do Supabase (porta 5432) |
   | `SUPABASE_URL` | Project URL do Supabase |
-  | `SUPABASE_SERVICE_ROLE_KEY` | chave service_role do Supabase |
+  | `SUPABASE_SECRET_KEY` | chave service_role do Supabase |
   | `ADMIN_PASSWORD` | senha do painel do organizador (forte, com 12 caracteres ou mais) |
   | `SESSION_SECRET` | texto aleatório longo (veja abaixo) |
   | `CRON_SECRET` | outro texto aleatório longo |
