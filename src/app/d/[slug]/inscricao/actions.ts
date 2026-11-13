@@ -25,7 +25,7 @@ const schema = z.object({
   neighborhood: z.string().trim().max(60).default(""),
   city: z.string().trim().min(2, "Escreva a cidade.").max(60),
   state: z.string().trim().toUpperCase().length(2, "Escreva a sigla do estado (ex.: SP)."),
-  accept: z.literal("on", { error: "Marque que você leu o regulamento." }),
+  accept: z.literal("on", { error: "Marque que você leu o regulamento e aceita o uso dos dados para o desafio." }),
 });
 
 export type SignupState = { error?: string };

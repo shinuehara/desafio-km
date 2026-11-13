@@ -98,7 +98,7 @@ export function RegisterForm({ action, today, yesterday, minDate, maxDate }: Pro
           <label htmlFor="f-foto" className="btn" style={{ flexDirection: "column", minHeight: 120, border: "2px dashed var(--accent)", borderRadius: 16, gap: 6 }}>
             <span style={{ color: "var(--accent)" }}><IconCamera size={32} /></span>
             Tirar foto ou escolher print
-            <span className="small muted" style={{ fontWeight: 400 }}>Do app, do relógio ou do painel da esteira</span>
+            <span className="small muted" style={{ fontWeight: 400 }}>Do app, do relógio ou do painel da esteira. Só o organizador vê.</span>
           </label>
         ) : (
           <div className="row" style={{ padding: 10, borderRadius: 16, background: "var(--surface)", border: "2px solid var(--ok)" }}>

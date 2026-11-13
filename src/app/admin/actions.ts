@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
 import { activities, challenges, participants, teams } from "@/db/schema";
@@ -62,6 +62,12 @@ export async function setKitSent(participantId: number, sent: boolean, slug: str
 
 export async function deleteParticipant(participantId: number, slug: string) {
   await requireAdmin();
+  // Apaga também as fotos guardadas (pedido de exclusão de dados precisa levar tudo).
+  const photos = await db
+    .select({ key: activities.photoKey })
+    .from(activities)
+    .where(and(eq(activities.participantId, participantId), isNotNull(activities.photoKey)));
+  await deleteFiles("fotos", photos.map((p) => p.key!).filter(Boolean));
   await db.delete(participants).where(eq(participants.id, participantId));
   revalidatePath(`/admin/d/${slug}`);
 }

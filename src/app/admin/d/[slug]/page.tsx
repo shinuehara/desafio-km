@@ -253,7 +253,7 @@ function PeopleTab({ c, teams, people, teamFilter }: { c: Challenge; teams: Team
                   </td>
                   <td>
                     <form action={deleteParticipant.bind(null, p.id, c.slug)}>
-                      <ConfirmSubmit message={`Excluir ${p.name} e todas as atividades? Isso não pode ser desfeito.`}>Excluir</ConfirmSubmit>
+                      <ConfirmSubmit message={`Excluir ${p.name} com todas as atividades e fotos? Use também quando a pessoa pedir para apagar os dados. Isso não pode ser desfeito.`}>Excluir</ConfirmSubmit>
                     </form>
                   </td>
                 </tr>

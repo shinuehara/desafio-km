@@ -68,6 +68,16 @@ Você **não** precisa criar tabelas nem pastas no Supabase: a primeira publica�
 
 > **Lembrete:** cada publicação gasta créditos da Netlify (cerca de 15). Mudar desafio, preço, PDF, turmas ou confirmar PIX **não** precisa de publicação: tudo isso é feito no painel.
 
+## Antes do ensaio: privacidade (LGPD)
+
+O sistema guarda nome, WhatsApp, endereço e fotos. Ele já mostra na inscrição para que os dados servem, pede o aceite e tem a página **Como cuidamos dos seus dados** (link no rodapé da página do desafio).
+
+- [ ] Cadastre no painel o **nome e o WhatsApp do organizador**: a página de privacidade indica esse contato para quem quiser ver, corrigir ou apagar os dados.
+- [ ] No **regulamento em PDF**, inclua um parágrafo curto com o mesmo conteúdo: quais dados, para que, quem vê e como pedir a exclusão.
+- [ ] Se alguém pedir para apagar os dados: painel › Inscritos › **Excluir**. Apaga a inscrição, as atividades e as fotos.
+
+Este é um cuidado básico para um desafio entre família e amigos, não uma consultoria jurídica. Se o projeto crescer e virar algo comercial, vale revisar com um advogado.
+
 ## 6. Ensaio geral (antes de chamar todo mundo)
 
 Faça com um **desafio de teste** e o seu próprio celular. Se possível, repita num **Android** e num **iPhone**.

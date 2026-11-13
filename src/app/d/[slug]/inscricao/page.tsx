@@ -42,6 +42,7 @@ export default async function SignupPage({ params, searchParams }: Props) {
             presetTeam={preset}
             sizes={SHIRT_SIZES}
             regulationUrl={c.regulationKey ? publicUrl(c.regulationKey) : null}
+            privacyUrl={`/d/${c.slug}/privacidade`}
           />
         )}
       </main>

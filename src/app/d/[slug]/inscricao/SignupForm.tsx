@@ -12,6 +12,7 @@ type Props = {
   presetTeam: string | null;
   sizes: readonly string[];
   regulationUrl: string | null;
+  privacyUrl: string;
 };
 
 const EMPTY = {
@@ -31,7 +32,7 @@ function maskCep(v: string) {
   return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
 }
 
-export function SignupForm({ action, teams, presetTeam, sizes, regulationUrl }: Props) {
+export function SignupForm({ action, teams, presetTeam, sizes, regulationUrl, privacyUrl }: Props) {
   const [state, formAction] = useActionState(action, {});
   const [v, setV] = useState({ ...EMPTY, team: presetTeam ?? "" });
   const [accept, setAccept] = useState(false);
@@ -144,11 +145,16 @@ export function SignupForm({ action, teams, presetTeam, sizes, regulationUrl }: 
         </div>
       </div>
 
-      <label className="check" htmlFor="f-aceite">
+      <p className="small" style={{ color: "var(--ink-2)" }}>
+        Usamos seus dados só para organizar o desafio e enviar o kit. No ranking aparece apenas o seu primeiro nome e a
+        inicial do sobrenome. <a href={privacyUrl} target="_blank" rel="noopener">Como cuidamos dos seus dados</a>
+      </p>
+      <label className="check" htmlFor="f-aceite" style={{ minHeight: 60, paddingBlock: 10 }}>
         <input id="f-aceite" type="checkbox" name="accept" checked={accept} onChange={(e) => setAccept(e.target.checked)} />
         <span>
           Li e aceito o{" "}
           {regulationUrl ? <a href={regulationUrl} target="_blank" rel="noopener"><b>regulamento</b></a> : <b>regulamento</b>}
+          {" "}e o uso dos meus dados para o desafio
         </span>
       </label>
 

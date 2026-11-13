@@ -110,6 +110,9 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           ]}
         />
       </section>
+      <p className="small center">
+        <Link href={`/d/${c.slug}/privacidade`} style={{ color: "var(--muted)" }}>Como cuidamos dos seus dados</Link>
+      </p>
     </main>
   );
 }
